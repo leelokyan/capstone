@@ -4,14 +4,13 @@ const port = 3000;
 
 const admin = require('firebase-admin');
 
-let serviceAccount = require('path/to/serviceAccountKey.json');
+let serviceAccount = require('../firebase-key.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
 let db = admin.firestore();
-
 
 app.get('/', (req, res) => res.send('Capstone Server!'));
 
