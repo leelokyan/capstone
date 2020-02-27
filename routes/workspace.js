@@ -95,11 +95,11 @@ router.post('/get_my_workspace', function(req,res){
 		*/
 		w1 = {
 			workspaceId : 1,
-			workspaceName : 'Krusty Crab'
+			workspaceName : 'Krusty Crab',
 		};
 		w2 = {
 			workspaceId : 2,
-			workspaceName : 'Chum Bucket'
+			workspaceName : 'Chum Bucket',
 		};
 		myWorkspaceList = [w1,w2];
 	}

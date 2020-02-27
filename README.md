@@ -12,7 +12,7 @@
 
 ## Start Server:
 1. `node server.js`
-2. Launch browser at localhost:3000
+2. Launch browser at localhost:4000
 
 ## Notes:
 - Before editing/running server or route files do a `npm install` to ensure that your local project has any new node modules.

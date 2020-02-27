@@ -2,7 +2,7 @@ const express = require('express');
 const admin = require('firebase-admin');
 const app = express();
 const bodyParser = require('body-parser');
-const port = 3000;
+const port = 4000;
 
 let serviceAccount = require('./firebase-key.json');
 
@@ -23,6 +23,7 @@ const workspace = require('./routes/workspace.js');
 const goals = require('./routes/goals.js');
 const strategy = require('./routes/strategy.js');
 const objective = require('./routes/objective.js');
+
 app.use(workspace);
 app.use(goals);
 app.use(strategy);
