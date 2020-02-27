@@ -1,0 +1,33 @@
+Endpoint declarations:
+
+! Cameron Questions:
+How do you join a workspace? Either enter workspace name and authcode, or display all workspaces then select workspace to join and enter authcode.
+
+WORKSPACE:
+	Create Workspace
+		- Endpoint: /create_workspace
+		- Request Type : POST
+		- Request:
+			- String : workspaceName (Name of new workspace)
+			- String : authCode (Password for workspace)
+		- Response:
+			- int : workspaceId (New workspace id or -1 on failure)
+	Join Workspace
+		- Endpoint: /join_workspace
+		- Request Type : POST
+		- Request:
+			- int : userId (Id of user attempting to join)
+			- int : workspaceId	(Id of workspace to join, Possibly Name)
+			- String : authCode	(Password for workspace)
+		- Response:
+			- Boolean : joinSuccess (True if joined, false if error)
+	Get MyWorkspace
+		- Endpoint: /get_my_workspace
+		- Request Type: POST
+		- Request:
+			- int : userId
+		- Response:
+			- Object [] : myWorkspaceList (or empty list)
+				- int : workspaceId
+				- String : workspaceName
+	Get AllWorkspace

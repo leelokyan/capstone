@@ -7,7 +7,11 @@ const router = express.Router();
 		Response - (bool:success,string:error,List:goals,int:percentComplete)
 ***************************/
 router.get('/get_goals', function(req,res){
+	// var userId = req.param(userId);
+	// var workspaceId = req.params.workspaceId;
+	// var strategyId = req.params.strategyId;
 
+	console.log(req.body);
 });
 
 /***************************
@@ -27,3 +31,4 @@ router.get('/create_goal', function(req,res){
 router.get('/update_goal', function(req,res){
 
 });
+module.exports = router;

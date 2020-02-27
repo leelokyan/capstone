@@ -6,7 +6,7 @@ const router = express.Router();
 		Request - (int:userId,int:workspaceId)
 		Response - (bool:success,string:error,List:Strategies)
 ***************************/
-router.get('/get_strategies', function(req,res){
+router.post('/get_strategies', function(req,res){
 
 });
 
@@ -27,3 +27,4 @@ router.post('/create_strategy', function(req,res){
 router.post('/update_strategy', function(req,res){
 
 });
+module.exports = router;

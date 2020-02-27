@@ -55,4 +55,5 @@ router.post('/add_tag', function(req,res){
 
 });
 
+module.exports = router;
 
