@@ -1,19 +1,26 @@
-Endpoint declarations:
+ENDPOINT DECLARATIONS
 
 ! Cameron Questions:
-How do you join a workspace? Either enter workspace name and authcode, or display all workspaces then select workspace to join and enter authcode.
+	- How do you join a workspace? Either enter workspace name and authcode, or display all workspaces then select workspace to join and enter authcode.
+	- Do we want to pass msg by default and only have content on error
+
+	- Endpoint :
+	- Request Type :
+	- Request:
+	- Response:
 
 WORKSPACE:
 	Create Workspace
-		- Endpoint: /create_workspace
+		- Endpoint : /create_workspace
 		- Request Type : POST
 		- Request:
 			- String : workspaceName (Name of new workspace)
 			- String : authCode (Password for workspace)
 		- Response:
 			- int : workspaceId (New workspace id or -1 on failure)
+	
 	Join Workspace
-		- Endpoint: /join_workspace
+		- Endpoint : /join_workspace
 		- Request Type : POST
 		- Request:
 			- int : userId (Id of user attempting to join)
@@ -21,8 +28,9 @@ WORKSPACE:
 			- String : authCode	(Password for workspace)
 		- Response:
 			- Boolean : joinSuccess (True if joined, false if error)
-	Get MyWorkspace
-		- Endpoint: /get_my_workspace
+	
+	Get My Workspaces
+		- Endpoint : /get_my_workspace
 		- Request Type: POST
 		- Request:
 			- int : userId
@@ -30,4 +38,49 @@ WORKSPACE:
 			- Object [] : myWorkspaceList (or empty list)
 				- int : workspaceId
 				- String : workspaceName
-	Get AllWorkspace
+				? workspace name?
+	
+	Get All Workspaces
+
+STRATEGY:
+	Create Strategy
+		- Endpoint : /create_strategy
+		- Request Type : POST
+		- Request:
+			- int : workplaceId
+			- String : strategyName
+			- String : description
+			- String : color
+		- Response:
+			- int : strategyId (id or -1 on error)
+
+	Update Strategy
+		- Endpoint : /update_strategy
+		- Request Type : POST
+		- Request:
+			- int : strategyId
+			- String : description
+			- String : color
+		- Response:
+			- int : strategyId (id or -1 on error)
+			- STRATEGY LIST? would this make it easier to display changes?
+	
+	Get Strategies
+		- Endpoint : /get_strategy
+		- Request Type : POST
+		- Request:
+			- int : workspaceId
+		- Response:
+			- Object [] : myStrategyList (or empty list)
+				- int : strategyId
+				- String : strategyName
+				- String : description
+				- String : color
+
+
+
+
+
+
+
+

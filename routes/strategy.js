@@ -27,4 +27,5 @@ router.post('/create_strategy', function(req,res){
 router.post('/update_strategy', function(req,res){
 
 });
+
 module.exports = router;
