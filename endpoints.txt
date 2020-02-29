@@ -9,6 +9,16 @@ ENDPOINT DECLARATIONS
 	- Request:
 	- Response:
 
+USERS:
+	Add New User:
+		- Endpoint : /add_user
+		- Request Type : POST
+		- Request:
+			- String : name
+			- String : email
+		- Response:
+			- int : userId (-1 on failure)
+
 WORKSPACE:
 	Create Workspace
 		- Endpoint : /create_workspace
