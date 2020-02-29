@@ -4,13 +4,21 @@ const app = express();
 const bodyParser = require('body-parser');
 const port = 4000;
 
-let serviceAccount = require('./firebase-key.json');
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+const db = initialize();
 
-let db = admin.firestore();
+function initialize () {
+
+	let serviceAccount = require('./firebase-key.json');
+
+	admin.initializeApp({
+	  credential: admin.credential.cert(serviceAccount)
+	});
+
+	let db = admin.firestore();
+
+	return db;
+}
 
 //Initialize Body-Parser (Must Initialize before routes)
 app.use(bodyParser.json());
