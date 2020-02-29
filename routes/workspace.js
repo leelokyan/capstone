@@ -1,6 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const admin = require('firebase-admin');
+
+const db = initialize();
+
+function initialize () {
+
+	const admin = require('firebase-admin');
+
+	let serviceAccount = require('../firebase-key.json');
+
+	admin.initializeApp({
+	  credential: admin.credential.cert(serviceAccount)
+	});
+
+	let db = admin.firestore();
+
+	return db;
+}
 
 exports.getUsers = function(db) {
 	db.collection('users').get()
