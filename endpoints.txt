@@ -17,7 +17,8 @@ USERS:
 			- String : name
 			- String : email
 		- Response:
-			- int : userId (-1 on failure)
+			- String : userId (-1 on failure)
+			- String : error (null on failure)
 
 WORKSPACE:
 	Create Workspace
@@ -63,6 +64,7 @@ STRATEGY:
 			- String : color
 		- Response:
 			- int : strategyId (id or -1 on error)
+			- String : error (null if no error)
 
 	Update Strategy
 		- Endpoint : /update_strategy
