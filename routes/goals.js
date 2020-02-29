@@ -1,6 +1,23 @@
 const express = require("express");
 const router = express.Router();
 
+const db = initialize();
+
+function initialize () {
+
+	const admin = require('firebase-admin');
+
+	let serviceAccount = require('../firebase-key.json');
+
+	admin.initializeApp({
+	  credential: admin.credential.cert(serviceAccount)
+	});
+
+	let db = admin.firestore();
+
+	return db;
+}
+
 /***************************
 	Get Goals:
 		Request - (int:userId,int:workspaceId,int:strategyId)
