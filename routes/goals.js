@@ -4,20 +4,17 @@ const router = express.Router();
 const db = initialize();
 
 function initialize () {
-
 	const admin = require('firebase-admin');
-
 	let db = admin.firestore();
-
 	return db;
 }
 
 /***************************
 	Get Goals:
-		Request - (int:userId,int:workspaceId,int:strategyId)
+		Request - (String:userId,int:workspaceId,int:strategyId)
 		Response - (bool:success,string:error,List:goals,int:percentComplete)
 ***************************/
-router.get('/get_goals', function(req,res){
+router.post('/get_goals', function(req,res){
 	// var userId = req.param(userId);
 	// var workspaceId = req.params.workspaceId;
 	// var strategyId = req.params.strategyId;
@@ -30,7 +27,7 @@ router.get('/get_goals', function(req,res){
 		Request - (int:workplaceId,int:strategyId,int:name)
 		Response - (bool:success,string:error,int:goalId)
 ***************************/
-router.get('/create_goal', function(req,res){
+router.post('/create_goal', function(req,res){
 
 });
 
@@ -39,7 +36,7 @@ router.get('/create_goal', function(req,res){
 		Request - (int:goalId,string:name)
 		Response - (bool:success)
 ***************************/
-router.get('/update_goal', function(req,res){
+router.post('/update_goal', function(req,res){
 
 });
 module.exports = router;
