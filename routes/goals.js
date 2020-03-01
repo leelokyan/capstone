@@ -35,18 +35,18 @@ router.post('/get_goals', function(req,res){
 
 /***************************
 	Create Goal:
-		Request - (String:strategyId,String:goalName,String:description)
+		Request - (String:strategyId,String:name,String:description)
 		Response - (String:error,String:goalId)
 ***************************/
 router.post('/create_goal', function(req,res){
 	let strategy = req.body.strategyId;
-	let goal = req.body.goalName;
+	let goal = req.body.name;
 	let description = req.body.description;
 
 	//Check for empty fields
 	if(!strategy || !goal || !description){
 		let response = {
-			error : "Strategy/goal/description name is null",
+			error : "Strategy/goal/description is null",
 			goalId : null
 		};
 		res.json(response);
@@ -55,7 +55,9 @@ router.post('/create_goal', function(req,res){
 		let data = {
 			name : goal,
 			description : description,
-			objectives : []
+			objectives : [],
+			startDate : null,
+			endDate : null
 		};
 		//Insert goal to db
 		let goalDocRef = db.collection("goals").doc();
