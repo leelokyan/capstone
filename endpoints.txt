@@ -68,6 +68,17 @@ STRATEGY:
 				- String : description
 				- String : color
 
+GOALS:
+	Create Goal
+		- Endpoint : /create_goal
+		- Request Type : POST
+		- Request:
+			- String:strategyId
+			- String:goalName
+			- String:description
+		- Response:
+			- String : error
+			- String : goalId
 
 object structures
 Strategy

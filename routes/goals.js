@@ -8,28 +8,89 @@ function initialize () {
 	let db = admin.firestore();
 	return db;
 }
+const admin = require('firebase-admin');
 
 /***************************
 	Get Goals:
-		Request - (String:userId,int:workspaceId,int:strategyId)
-		Response - (bool:success,string:error,List:goals,int:percentComplete)
+		Request - (String:strategyId)
+		Response - (List:goals,String:error,int:percentComplete)
 ***************************/
 router.post('/get_goals', function(req,res){
-	// var userId = req.param(userId);
-	// var workspaceId = req.params.workspaceId;
-	// var strategyId = req.params.strategyId;
+	let goal = req.body.goalId;
 
-	console.log(req.body);
+	let goals = [];
+	let error = null;
+	let response = null;
+
+	if(!strategy){
+		response = {
+			goals : goals,
+			error : "Null strategy id"
+		}
+		res.json(response);
+	}else{
+		let goalRef = db.collection("goals");
+	}
 });
 
 /***************************
 	Create Goal:
-		Request - (int:workplaceId,int:strategyId,int:name)
-		Response - (bool:success,string:error,int:goalId)
+		Request - (String:strategyId,String:goalName,String:description)
+		Response - (String:error,String:goalId)
 ***************************/
 router.post('/create_goal', function(req,res){
+	let strategy = req.body.strategyId;
+	let goal = req.body.goalName;
+	let description = req.body.description;
 
+	//Check for empty fields
+	if(!strategy || !goal || !description){
+		let response = {
+			error : "Strategy/goal/description name is null",
+			goalId : null
+		};
+		res.json(response);
+	}else{
+		//Create Goal
+		let data = {
+			name : goal,
+			description : description,
+			objectives : []
+		};
+		//Insert goal to db
+		let goalDocRef = db.collection("goals").doc();
+		let setDocRef = goalDocRef.set(data);
+
+		//Update strategy list
+		let strategyRef = db.collection("strategies");
+		let s = strategyRef.doc(strategy).get()
+			.then(doc => {
+				if (!doc.exists) {
+			    	console.log("Failure: strategy does not exist");
+			    	var response = {
+						error : "Failure: strategy does not exist",
+						goalId : null
+					};
+					res.json(response);	
+			    } else {
+					//this below adds the current user to the array of users in the document 
+					let goals = strategyRef.doc(strategy).update({
+						goals: admin.firestore.FieldValue.arrayUnion(goalDocRef.id)
+					});
+					var response = {
+						error : null,
+						goalId : goalDocRef.id
+					};
+					res.json(response);	
+			    }
+			  })
+			  .catch(err => {
+			    console.log('Error getting document', err);
+			  }
+		);
+	}
 });
+
 
 /***************************
 	Update Goal:
