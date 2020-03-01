@@ -79,6 +79,52 @@ router.post('/add_user',function(req,res){
 		});
 	}
 });
+/***************************
+	Get User Info:
+		Request - (String email)
+		Response - (String: fname, String: lname, String email, String error)
+***************************/
+router.post('/get_user',function(req,res){
+	let email = req.body.email;
+	let response = null;
+	if(!email){
+		response = {
+			fname : null,
+			lname : null,
+			email : null,
+			error : "No email sent"
+		};
+		res.json(response);
+	}else{
+		let usersRef = db.collection('users');
+		let queryRef = usersRef.where('email','==',email).get()
+		.then(snapshot =>{
+			if(snapshot.empty){
+				response = {
+					fname : null,
+					lname : null,
+					email : null,
+					error : "No matching email"
+				};
+				res.json(response);
+			}else{
+				let fname = null;
+				let lname = null;
+				snapshot.forEach(doc => {
+					fname = doc.data().fname;
+					lname = doc.data().lname;
+			    });
+				response = {
+					fname : fname,
+					lname : lname,
+					email : email,
+					error : null
+				};
+				res.json(response);
+			}
+		})
+	}
+});
 
 
 module.exports = router;

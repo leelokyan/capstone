@@ -14,44 +14,23 @@ USERS:
 		- Endpoint : /add_user
 		- Request Type : POST
 		- Request:
-			- String : name
-			- String : email
+			- String : fname
+			- String : lname
+			- String : email (email is the same as userId)
 		- Response:
 			- String : userId (-1 on failure)
 			- String : error (null on failure)
-
-WORKSPACE:
-	Create Workspace
-		- Endpoint : /create_workspace
+	Get User:
+		- Endpoint : /get_user
 		- Request Type : POST
-		- Request:
-			- String : workspaceName (Name of new workspace)
-			- String : authCode (Password for workspace)
-		- Response:
-			- int : workspaceId (New workspace id or -1 on failure)
-	
-	Join Workspace
-		- Endpoint : /join_workspace
-		- Request Type : POST
-		- Request:
-			- int : userId (Id of user attempting to join)
-			- int : workspaceId	(Id of workspace to join, Possibly Name)
-			- String : authCode	(Password for workspace)
-		- Response:
-			- Boolean : joinSuccess (True if joined, false if error)
-	
-	Get My Workspaces
-		- Endpoint : /get_my_workspace
-		- Request Type: POST
-		- Request:
-			- int : userId
-		- Response:
-			- Object [] : myWorkspaceList (or empty list)
-				- int : workspaceId
-				- String : workspaceName
-				? workspace name?
-	
-	Get All Workspaces
+		- Request : 
+			- String : email
+			userId,zstring:workspaceId,string:authCode
+		- Response :
+			- String : fname
+			- String : lname
+			- String : email
+			- String : error
 
 STRATEGY:
 	Create Strategy
