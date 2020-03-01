@@ -110,14 +110,20 @@ router.post('/join_workspace', function(req,res){
 	var userId = req.body.userId;
 	var workspaceId = req.body.workspaceId;
 	var authCode = req.body.authCode;
-	var joinSuccess;
+	var joinSuccess = "true";
 	let error = "";
 
 	let workspaceRef = db.collection('workspaces');
 
 	//Note: check desired security measures for passing authCode, can encrypt
 	if(!userId || !workspaceId){
-		joinSuccess = false;
+		joinSuccess = "false";
+		error = "No userID or workspaceID provided";
+		var response = {
+			error: error,
+			joinSuccess : joinSuccess
+		};
+		res.json(response);
 	}else{
 		console.log("User Id: " + userId);
 		console.log("Workspace Id: " + workspaceId);
@@ -131,25 +137,29 @@ router.post('/join_workspace', function(req,res){
 		let workspace = workspaceRef.doc(workspaceId).get()
 			.then(doc => {
 				if (!doc.exists) {
-			      joinSuccess = false;
+			      joinSuccess = "false";
 			      error = "No workspace with that ID";
 			    } else {
 					workspaceAuthCode = doc.get("authCode");
-					console.log("HELLO " + workspaceAuthCode);
-			      	console.log("workspaceAuthCdsdsode " + workspaceAuthCode);
 					if (workspaceAuthCode == authCode) {
-						joinSuccess = true;
+						joinSuccess = "true";
 						//this below adds the current user to the array of users in the document 
 						let users = workspaceRef.doc(workspaceId).update({
 							users: admin.firestore.FieldValue.arrayUnion(userId)
 						});
+						
 					}
 					else {
-						joinSuccess = false;
-						if (error == "") {
-							error = "Authorization code is incorrect";
-						}
+						joinSuccess = "false";
+						error = "Authorization code is incorrect";
+						
 					}
+					var response = {
+						error: error,
+						joinSuccess : joinSuccess
+					};
+					res.json(response);
+					
 			    }
 			  })
 			  .catch(err => {
@@ -158,11 +168,7 @@ router.post('/join_workspace', function(req,res){
 		//then add user to the workspace
 		
 	}
-	var response = {
-		error: error,
-		joinSuccess : joinSuccess
-	};
-	res.json(response);
+	
 });
 
 /***************************
