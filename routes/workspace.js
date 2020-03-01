@@ -147,6 +147,10 @@ router.post('/join_workspace', function(req,res){
 						let users = workspaceRef.doc(workspaceId).update({
 							users: admin.firestore.FieldValue.arrayUnion(userId)
 						});
+
+						let userRef = db.collection("users").doc(userId).update({
+							workspaces : admin.firestore.FieldValue.arrayUnion(workspaceId)
+						})
 						
 					}
 					else {
@@ -165,17 +169,16 @@ router.post('/join_workspace', function(req,res){
 			  .catch(err => {
 			    console.log('Error getting document', err);
 			  });
-		//then add user to the workspace
 		
 	}
 	
 });
 
 /***************************
-	Get My Workspace:
-		Request - (int:userId)
+	Get My Workspaces:
+		Request - (string:userId)
 		Response - (Object [] : myWorkspaceList (or empty list)
-					- int : workspaceId
+					- string : workspaceId
 					- String : workspaceName)
 ***************************/
 router.post('/get_my_workspace', function(req,res){
@@ -191,20 +194,19 @@ router.post('/get_my_workspace', function(req,res){
 		/***
 		* Insert Database API Call
 		*/
-		w1 = {
-			workspaceId : 1,
-			workspaceName : 'Krusty Crab',
-		};
-		w2 = {
-			workspaceId : 2,
-			workspaceName : 'Chum Bucket',
-		};
-		myWorkspaceList = [w1,w2];
+		
+		let userRef = db.collection("users").doc(userId);
+		userRef.get().then(
+			function (doc) {
+				myWorkspaceList = doc.get("workspaces");
+				var response = {
+					myWorkspaceList : myWorkspaceList
+				};
+				res.json(response);
+			}
+		);
 	}
-	var response = {
-		myWorkspaceList : myWorkspaceList
-	};
-	res.json(response);
+	
 });
 
 module.exports = router;
