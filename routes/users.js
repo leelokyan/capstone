@@ -12,6 +12,18 @@ function initialize () {
 	return db;
 }
 
+function addUser (){
+	db.collection('users').get()
+	  .then((snapshot) => {
+	    snapshot.forEach((doc) => {
+	      console.log(doc.id, '=>', doc.data());
+	    });
+	  })
+	  .catch((err) => {
+	    console.log('Error getting documents', err);
+	});
+}
+
 /***************************
 	Add User:
 		Request - (String:name, String email)
@@ -30,7 +42,7 @@ router.post('/add_user',function(req,res){
 		error = "Invalid username or email";
 	}else{
 		//Database call
-		let response;
+		addUser();
 		userId = 1;
 	}
 	let response = {
@@ -38,7 +50,7 @@ router.post('/add_user',function(req,res){
 		error : error
 	};
 	res.json(response);
-}
+});
 
 
 module.exports = router;
