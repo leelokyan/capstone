@@ -6,11 +6,13 @@ const db = initialize();
 function initialize () {
 
 	const admin = require('firebase-admin');
-
 	let db = admin.firestore();
 
 	return db;
 }
+
+const admin = require('firebase-admin');
+
 
 exports.getUsers = function() {
 	db.collection('users').get()
@@ -48,8 +50,8 @@ function workspaceExists(workspaceName) {
 
 /***************************
 	Create Workspace:
-		Request - (string:workspaceName,string:authCode)
-		Response - (string:workspaceId)
+		Request - (string:workspaceName,string:userId,string:authCode)
+		Response - (string:error, string:workspaceId)
 ***************************/
 router.post('/create_workspace', function(req,res){
 	console.log("create_workspace");
@@ -57,12 +59,14 @@ router.post('/create_workspace', function(req,res){
 	console.log(req);
 	var workspaceName = req.body.workspaceName;
 	var authCode = req.body.authCode;
+	var userId = req.body.userId;
 	let error = "";
 	console.log(workspaceName + " "  + authCode);
+	let workspaceDocRef;
 	//Check with frontend team degree of backend validation necessary
-	if(!workspaceName || !authCode){	
+	if(!workspaceName || !authCode || !userId){	
 		workspaceId = "";
-		error = "No workspace name or authentication code given";
+		error = "No workspace name, authentication code, or userId given";
 	}else{
 		console.log("Workspace Name: " + workspaceName);
 		console.log("AuthCode: " + authCode);
@@ -77,9 +81,11 @@ router.post('/create_workspace', function(req,res){
 		else {
 			workspaceDocRef = db.collection("workspaces").doc();
 			console.log("id" + workspaceDocRef.id);
+			workspaceId = workspaceDocRef.id;
 			let data = {
 				workspaceName : workspaceName,
-				authCode : authCode
+				authCode : authCode,
+				users : [ userId ]
 			}
 
 			let setDoc = workspaceDocRef.set(data);
@@ -87,7 +93,7 @@ router.post('/create_workspace', function(req,res){
 	}	
 	var response = {
 		error : error, 
-		workspaceId : workspaceDocRef.id //this string will be empty if there's an error
+		workspaceId : workspaceId //this string will be empty if there's an error
 
 	};
 	res.json(response);
@@ -95,8 +101,8 @@ router.post('/create_workspace', function(req,res){
 
 /***************************
 	Join Workspace:
-		Request - (int:userId,int:workspaceId,string:authCode)
-		Response - (bool:joinSuccess)
+		Request - (string:userId,string:workspaceId,string:authCode)
+		Response - (string:error, bool:joinSuccess)
 ***************************/
 router.post('/join_workspace', function(req,res){
 	console.log("join_workspace");
@@ -104,11 +110,20 @@ router.post('/join_workspace', function(req,res){
 	var userId = req.body.userId;
 	var workspaceId = req.body.workspaceId;
 	var authCode = req.body.authCode;
-	var joinSuccess;
+	var joinSuccess = "true";
+	let error = "";
+
+	let workspaceRef = db.collection('workspaces');
 
 	//Note: check desired security measures for passing authCode, can encrypt
-	if(!userId || !workspaceId || !authCode){
-		joinSuccess = false;
+	if(!userId || !workspaceId){
+		joinSuccess = "false";
+		error = "No userID or workspaceID provided";
+		var response = {
+			error: error,
+			joinSuccess : joinSuccess
+		};
+		res.json(response);
 	}else{
 		console.log("User Id: " + userId);
 		console.log("Workspace Id: " + workspaceId);
@@ -116,12 +131,44 @@ router.post('/join_workspace', function(req,res){
 		/***
 		* Insert Database API Call
 		*/
-		joinSuccess = true;
+		//check authcode
+	// Create a query against the collection
+		let workspaceAuthCode = "";
+		let workspace = workspaceRef.doc(workspaceId).get()
+			.then(doc => {
+				if (!doc.exists) {
+			      joinSuccess = "false";
+			      error = "No workspace with that ID";
+			    } else {
+					workspaceAuthCode = doc.get("authCode");
+					if (workspaceAuthCode == authCode) {
+						joinSuccess = "true";
+						//this below adds the current user to the array of users in the document 
+						let users = workspaceRef.doc(workspaceId).update({
+							users: admin.firestore.FieldValue.arrayUnion(userId)
+						});
+						
+					}
+					else {
+						joinSuccess = "false";
+						error = "Authorization code is incorrect";
+						
+					}
+					var response = {
+						error: error,
+						joinSuccess : joinSuccess
+					};
+					res.json(response);
+					
+			    }
+			  })
+			  .catch(err => {
+			    console.log('Error getting document', err);
+			  });
+		//then add user to the workspace
+		
 	}
-	var response = {
-		'joinSuccess' : joinSuccess
-	};
-	res.json(response);
+	
 });
 
 /***************************
@@ -155,7 +202,7 @@ router.post('/get_my_workspace', function(req,res){
 		myWorkspaceList = [w1,w2];
 	}
 	var response = {
-		'myWorkspaceList' : myWorkspaceList
+		myWorkspaceList : myWorkspaceList
 	};
 	res.json(response);
 });
