@@ -1,8 +1,11 @@
 const express = require('express');
 const admin = require('firebase-admin');
-const app = express();
+var app = express();
 const bodyParser = require('body-parser');
 const port = 4000;
+
+var cors = require('cors');
+app.use(cors());
 
 
 const db = initialize();
