@@ -11,32 +11,83 @@ function initialize () {
 
 /***************************
 	Get Strategies:
-		Request - (int:userId,int:workspaceId)
-		Response - (bool:success,string:error,List:Strategies)
+		Request - 
+		Response - (bool:success,string:error,array of objects:Strategies)
 ***************************/
 router.post('/get_strategies', function(req,res){
+	let result = [];
+	let success = true;
+	let error = "";
+
+	console.log("get_strategies");
+
+	let strategiesRef = db.collection("strategies");
+	let allStrategies = strategiesRef.get()
+		.then(snapshot => {
+			success = true;
+			snapshot.forEach(doc => {
+				//name
+				//array of goals
+				//description
+				let strategyData = {
+					strategyId : doc.id,
+					name : doc.get("name"),
+					goals : doc.get("goals"),
+					description : doc.get("description")
+				};
+
+				console.log(strategyData);
+				result.push(strategyData);
+			});
+
+			var response = {
+				strategies : result,
+				error : error,
+				success : success
+			};
+			res.json(response);
+		})
+		.catch (err => {
+			console.log("Error getting documents", err);
+			error = "Unable to get documents";
+			success = false;
+
+			var response = {
+				strategies : [],
+				error : error,
+				success : success
+			};
+			res.json(response);
+		})
 
 });
 
 /***************************
 	Create Strategy:
-		Request - (String:workspaceId,String:name,String:description,String:color)
-		Response - (int:strategyId,string:error)
+		Request - (String:name,String:description)
+		Response - (string:strategyId,string:error)
 ***************************/
 router.post('/create_strategy', function(req,res){
-	let workspaceId = req.body.workspaceId;
 	let name = req.body.name;
 	let description = req.body.description;
-	let color = req.body.color;
 
-	let strategyId;
-	let error;
+	let strategyId = "";
+	let error = "";
 
-	if(!workspaceId || !name || !description ||  !color){
-		strategyId = -1;
-		error = 'Create strategy error';
+	if(!name || !description){
+		strategyId = "";
+		error = 'Create strategy error - missing name or description';
 	}else{
 		//Database call
+		let strategyData = {
+			name : name,
+			description : description,
+			goals : []
+		}
+		let strategyRef = db.collection("strategies").doc();
+		strategyRef.set(strategyData);
+
+		strategyId = strategyRef.id;
 	}
 
 	var response = {
@@ -49,11 +100,49 @@ router.post('/create_strategy', function(req,res){
 
 /***************************
 	Update Strategy:
-		Request - (string:name,string:description)
+		Request - (string: strategyId, string:name,string:description)
 		Response - (bool:success)
 ***************************/
 router.post('/update_strategy', function(req,res){
+	let name = req.body.name;
+	let description = req.body.description;
+	let strategyId = req.body.strategyId;
 
+	let success = true;
+	let error = "";
+
+	db.collection("strategies").doc(strategyId).get() 
+		.then(doc => {
+			//check if strategy with that id exists
+			if (!doc.exists) {
+				error = "No strategy with that ID";
+				success = false;
+
+				var response = {
+					success : success,
+					error : error
+				};
+				res.json(response);
+			}
+			else {
+
+				//update the strategy
+				db.collection("strategies").doc(strategyId).update( {
+					name : name,
+					description : description
+				});
+
+				var response = {
+					success : true,
+					error : error
+				};
+				res.json(response);
+			}
+		})
+		.catch(err => {
+			console.log('error getting doc' , err);
+		});
+	
 });
 
 module.exports = router;

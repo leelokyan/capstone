@@ -49,12 +49,11 @@ STRATEGY:
 		- Endpoint : /update_strategy
 		- Request Type : POST
 		- Request:
-			- int : strategyId
+			- string : strategyId
+			- string : name 
 			- String : description
-			- String : color
 		- Response:
-			- int : strategyId (id or -1 on error)
-			- STRATEGY LIST? would this make it easier to display changes?
+			- bool : success
 	
 	Get Strategies
 		- Endpoint : /get_strategy
