@@ -1,0 +1,5 @@
+TO DO
+- supposrt completion for strategies 
+- add delete for goals, users, strategy 
+- possibly sessions
+- we need to finish objectives 
