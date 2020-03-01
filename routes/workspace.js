@@ -24,30 +24,71 @@ exports.getUsers = function() {
 	});
 };
 
+//helper
+function workspaceExists(workspaceName) {
+	// Create a reference to the cities collection
+	let workspaceRef = db.collection('workspaces');
+
+	// Create a query against the collection
+	let queryRef = workspaceRef.where('workspaceName', '==', workspaceName).get()
+	  .then(snapshot => {
+	    if (snapshot.empty) {
+			console.log('No matching documents.');
+			return false;
+	    }  
+	    else {
+	    	return true;
+	    }
+
+	  })
+	  .catch(err => {
+	    console.log('Error getting documents', err);
+	  });
+}
+
 /***************************
 	Create Workspace:
 		Request - (string:workspaceName,string:authCode)
-		Response - (int:workspaceId)
+		Response - (string:workspaceId)
 ***************************/
 router.post('/create_workspace', function(req,res){
 	console.log("create_workspace");
 	//Parse Request Body
+	console.log(req);
 	var workspaceName = req.body.workspaceName;
 	var authCode = req.body.authCode;
-
+	let error = "";
+	console.log(workspaceName + " "  + authCode);
 	//Check with frontend team degree of backend validation necessary
 	if(!workspaceName || !authCode){	
-		workspaceId = -1;
+		workspaceId = "";
+		error = "No workspace name or authentication code given";
 	}else{
 		console.log("Workspace Name: " + workspaceName);
 		console.log("AuthCode: " + authCode);
 		/***
 		* Insert Database API Call
 		*/
-		workspaceId = 1;
+		//check if workspace name already exists, if so, give -1 to indicate error
+		if (workspaceExists(workspaceName)) {
+			workspaceId = "";
+			error = "Workspace already exists";
+		}
+		else {
+			workspaceDocRef = db.collection("workspaces").doc();
+			console.log("id" + workspaceDocRef.id);
+			let data = {
+				workspaceName : workspaceName,
+				authCode : authCode
+			}
+
+			let setDoc = workspaceDocRef.set(data);
+		}
 	}	
 	var response = {
-		'workspaceId' : workspaceId
+		error : error, 
+		workspaceId : workspaceDocRef.id //this string will be empty if there's an error
+
 	};
 	res.json(response);
 });
