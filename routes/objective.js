@@ -4,36 +4,33 @@ const router = express.Router();
 const db = initialize();
 
 function initialize () {
-
 	const admin = require('firebase-admin');
-
 	let db = admin.firestore();
-
 	return db;
 }
 
 /***************************
 	Get My Objectives:
-		Request - (int:userId,int:goalId)
-		Response - (List:Objectives)
+		Request - (string:userId)
+		Response - (array of objects:Objectives)
 ***************************/
-router.get('/get_my_objectives', function(req,res){
+router.post('/get_my_objectives', function(req,res){
 
 });
 
 /***************************
-	Get All Objectives:
-		Request - (int:goalId)
-		Response - (bool:success,string:error,List:goals,int:percentComplete)
+	Get Objectives of Goal:
+		Request - (string:goalId)
+		Response - (bool:success,string:error,List:goals)
 ***************************/
-router.get('/get_objectives', function(req,res){
+router.post('/get_objectives', function(req,res){
 
 });
 
 /***************************
 	Create Objective:
-		Request - (int:goalId,int:strategyId,List:tags,int:userId,date:startDate,date:endDate)
-		Response - (int:objectiveId,bool:success,string:error)
+		Request - (string:goalId,array of strings:tags,string:userId,string:startDate,string:endDate)
+		Response - (string:objectiveId,bool:success,string:error)
 ***************************/
 router.post('/create_objective', function(req,res){
 
@@ -41,8 +38,8 @@ router.post('/create_objective', function(req,res){
 
 /***************************
 	Update Objective:
-		Request - (int:goalId,int strategyId,List:tags,int:userId,date:startDate,date:endDate,int:status)
-		Response - (int:objectiveId,bool:success,string:error)
+		Request - (string:objectiveId, string [] :tags,string []:assignedUsers,string:startDate,string:endDate,int:status)
+		Response - (bool:success,string:error)
 ***************************/
 router.post('/update_objective', function(req,res){
 
@@ -50,7 +47,7 @@ router.post('/update_objective', function(req,res){
 
 /***************************
 	Update Objective Status:
-		Request - (int:newStatus,int:objectiveId)
+		Request - (int:status,string:objectiveId)
 		Response - (bool:success)
 ***************************/
 router.post('/update_objective_status', function(req,res){
@@ -65,6 +62,36 @@ router.post('/update_objective_status', function(req,res){
 router.post('/add_tag', function(req,res){
 
 });
+
+
+/***************************
+	Assign Tag:
+		Request - (string:tagName, string objectiveId)
+		Response - (bool:success)
+***************************/
+router.post('/assign_tag', function(req,res){
+
+});
+
+/***************************
+	Assign User:
+		Request - (string:userId, string: objectiveId)
+		Response - (bool:success)
+***************************/
+router.post('/assign_user', function(req,res) {
+
+});
+
+
+/***************************
+	Delete Objective:
+		Request - (string:objectiveId)
+		Response - (bool:success)
+***************************/
+router.post('/delete_objective', function(req,res) {
+
+});
+
 
 module.exports = router;
 

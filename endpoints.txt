@@ -21,12 +21,14 @@ USERS:
 		- Response:
 			- Boolean : success (-1 on failure)
 			- String : error (null on failure)
+
 	Get User:
 		- Endpoint : /get_user
 		- Request Type : POST
 		- Request : 
 			- String : email
-			userId,zstring:workspaceId,string:authCode
+			- string:workspaceId
+			- string:authCode
 		- Response :
 			- String : fname
 			- String : lname
@@ -38,36 +40,104 @@ STRATEGY:
 		- Endpoint : /create_strategy
 		- Request Type : POST
 		- Request:
-			- int : workplaceId
 			- String : strategyName
 			- String : description
-			- String : color
 		- Response:
-			- int : strategyId (id or -1 on error)
+			- string : strategyId (id or "" on error)
 			- String : error (null if no error)
 
 	Update Strategy
 		- Endpoint : /update_strategy
 		- Request Type : POST
 		- Request:
-			- int : strategyId
+			- string : strategyId
+			- string : name 
 			- String : description
-			- String : color
 		- Response:
-			- int : strategyId (id or -1 on error)
-			- STRATEGY LIST? would this make it easier to display changes?
+			- bool : success
 	
 	Get Strategies
 		- Endpoint : /get_strategy
 		- Request Type : POST
 		- Request:
-			- int : workspaceId
 		- Response:
 			- Object [] : myStrategyList (or empty list)
-				- int : strategyId
+				- string : strategyId
 				- String : strategyName
 				- String : description
-				- String : color
+
+OBJECTIVE:
+	Get My Objectives
+		- Endpoint : /get_my_objectives
+		- Request Type : POST
+		- Request: 
+			- string : userId
+		- Response :
+			- object [] : objectives
+				- string: objectiveID
+				- string: name
+				- string: startDate
+				- string: endDate
+				- string: tags
+				- string []: assignedUsers
+				- string: description
+				- string: goal (parent goal)
+				- bool : complete
+	Get Objectives of Goal
+		- Endpoint : /get_objectives
+		- Request Type : POST
+		- request :
+			- string : goalId
+		- response :
+			- bool : success
+			- string : error
+			- object [] : objectives
+				- string: objectiveID
+				- string: name
+				- string: startDate
+				- string: endDate
+				- string: tags
+				- string []: assignedUsers
+				- string: description
+				- string: goal (parent goal)
+				- bool : complete
+
+	Create Objective 
+		- Endpoint : /create_objective
+		- request type : POST
+		- request :
+			- string : goalId
+			- string[] : tags
+			- string : userId
+			- string : startDate
+			- string : endDate
+		- response :
+			- string : objectiveId
+			- bool : success
+			- string : error
+
+	Update Objective
+		- endpoint : /update_objective
+		- request type : POST
+		- request : 
+			- string : objectiveId
+			- string [] : tags
+			- string [] : assignedUsers
+			- string : startDate
+			- string : endDate
+			- int : status
+		- response :
+			- bool : success
+			- string: error
+
+	Update Objective Status
+		- endpoint : /update_objective_status
+		- request type : POST
+		- request :
+			- string : objectiveId
+			- int : status
+		- response :
+			- bool : success
 
 GOALS:
 	Create Goal
@@ -81,6 +151,40 @@ GOALS:
 			- String : error
 			- String : goalId
 
+	Add Tag
+		- endpoint : /add_tag
+		- request type : POST
+		- request : 
+			- string : tagName
+		- response :
+			- bool : success
+
+	Assign Tag
+		- endpoint : /assign_tag
+		- request type : POST
+		- request : 
+			- string : tagName
+			- string : objectiveId
+		- response
+			- bool : success
+
+	Assign User
+		- endpoint : /assign_user
+		- request type : POST
+		- request :
+			- string : userId
+			- string : objectiveId
+		- response :
+			- bool : success
+
+	Delete Objective
+		- endpoint : /delete_objective
+		- request type : POST
+		- request : 
+			- string : objectiveId
+		- response :
+			- bool : success
+				
 object structures
 Strategy
 	string: strategyId
@@ -101,13 +205,14 @@ Objective
 	string: startDate
 	string: endDate
 	string: tags
-	string: assignedUsers
+	string []: assignedUsers
 	string: description
-	string: goal 
+	string: goal (parent goal)
+	bool : complete 
 User
 	string: email
-	string: first name
-	string: last name
+	string: fname
+	string: lname
 Tag
 	string: tagName
 
