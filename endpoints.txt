@@ -80,6 +80,37 @@ GOALS:
 			- String : error
 			- String : goalId
 
+object structures
+Strategy
+	string: strategyId
+	string: name
+	string []: goals
+	string description
+Goal
+	string: goalId
+	string: name
+	string: strategyId
+	string []: objectives
+	string: description
+	string: startDate (should correspond to first start date of objectives)
+	string: endDate (should correspond to the last end date of objectives)
+Objective
+	string: objectiveID
+	string: name
+	string: startDate
+	string: endDate
+	string: tags
+	string: assignedUsers
+	string: description
+	string: goal 
+User
+	string: email
+	string: first name
+	string: last name
+Tag
+	string: tagName
+
+
 
 
 
