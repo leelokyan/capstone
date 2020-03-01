@@ -31,11 +31,13 @@ const workspace = require('./routes/workspace.js');
 const goals = require('./routes/goals.js');
 const strategy = require('./routes/strategy.js');
 const objective = require('./routes/objective.js');
+const users = require('./routes/users.js');
 
 app.use(workspace);
 app.use(goals);
 app.use(strategy);
 app.use(objective);
+app.use(users);
 
 /***
 * !!!!!Replace 'website.html' with actual home page!!!!

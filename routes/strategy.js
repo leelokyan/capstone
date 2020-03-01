@@ -23,10 +23,30 @@ router.post('/get_strategies', function(req,res){
 
 /***************************
 	Create Strategy:
-		Request - (int:workplaceId,string:name,string:description,string:color)
-		Response - (int:strategyId,bool:success,string:error)
+		Request - (int:workspaceId,string:name,string:description,string:color)
+		Response - (int:strategyId,string:error)
 ***************************/
 router.post('/create_strategy', function(req,res){
+	let workspaceId = req.body.workspaceId;
+	let name = req.body.name;
+	let description = req.body.description;
+	let color = req.body.color;
+
+	let strategyId;
+	let error;
+
+	if(!workspaceId || !name || !description ||  !color){
+		strategyId = -1;
+		error = 'Create strategy error';
+	}else{
+		//Database call
+	}
+
+	var response = {
+		strategyId : strategyId,
+		error : error
+	};
+	res.json(response);
 
 });
 
