@@ -4,11 +4,8 @@ const router = express.Router();
 const db = initialize();
 
 function initialize () {
-
 	const admin = require('firebase-admin');
-
 	let db = admin.firestore();
-
 	return db;
 }
 
@@ -23,7 +20,7 @@ router.post('/get_strategies', function(req,res){
 
 /***************************
 	Create Strategy:
-		Request - (int:workspaceId,string:name,string:description,string:color)
+		Request - (String:workspaceId,String:name,String:description,String:color)
 		Response - (int:strategyId,string:error)
 ***************************/
 router.post('/create_strategy', function(req,res){

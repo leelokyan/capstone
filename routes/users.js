@@ -4,20 +4,22 @@ const router = express.Router();
 const db = initialize();
 
 function initialize () {
-
 	const admin = require('firebase-admin');
-
 	let db = admin.firestore();
-
 	return db;
 }
 
-function addUser (){
-	db.collection('users').get()
-	  .then((snapshot) => {
-	    snapshot.forEach((doc) => {
-	      console.log(doc.id, '=>', doc.data());
-	    });
+function userExists (email,addUser){
+	let usersRef = db.collection('users');
+
+	let queryRef = usersRef.where('email','==',email).get()
+	  .then(snapshot => {
+	  	if(snapshot.empty){
+	  		console.log('No matching user');
+	  	}else{
+	  		console.log('matching user found');
+	  		return true;
+	  	}
 	  })
 	  .catch((err) => {
 	    console.log('Error getting documents', err);
@@ -26,30 +28,56 @@ function addUser (){
 
 /***************************
 	Add User:
-		Request - (String:name, String email)
+		Request - (String: fname, String: lname, String email)
 		Response - (String : userId)
 ***************************/
 router.post('/add_user',function(req,res){
-	let name = req.body.name;
+	let fname = req.body.fname;
+	let lname = req.body.lname;
 	let email = req.body.email;
 
-	let userId = null;
-	let error = null;
-
 	console.log("Add User");
-	if(!name || !email){
-		userId = -1;
+
+	if(!email|| !fname || !lname){
+		userId = '-1';
 		error = "Invalid username or email";
+		response = {
+			userId : null,
+			error : 'invalid name or email'
+		};
+		res.json(response);
 	}else{
-		//Database call
-		addUser();
-		userId = 1;
+		let usersRef = db.collection('users');
+		let response = null;
+		let queryRef = usersRef.where('email','==',email).get()
+		  .then(snapshot => {
+		  	if(snapshot.empty){
+		  		console.log('Adding user: ' + email);
+				userDocRef = db.collection("users").doc();
+				console.log("id" + userDocRef.id);
+				let data = {
+					email : email,
+					fname : fname,
+					lname : lname
+				}
+				let setDoc = userDocRef.set(data);
+				response = {
+					userId : email,
+					error : null
+				};
+		  	}else{
+		  		console.log('Error, user exists');
+				response = {
+					userId : null,
+					error : 'User exists'
+				};
+		  	}
+		  	res.json(response);
+		  })
+		  .catch((err) => {
+		    console.log('Error getting documents', err);
+		});
 	}
-	let response = {
-		userId : userId,
-		error : error
-	};
-	res.json(response);
 });
 
 
