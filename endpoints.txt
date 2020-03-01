@@ -17,8 +17,9 @@ USERS:
 			- String : fname
 			- String : lname
 			- String : email (email is the same as userId)
+			- String : workspacePassword
 		- Response:
-			- String : userId (-1 on failure)
+			- Boolean : success (-1 on failure)
 			- String : error (null on failure)
 	Get User:
 		- Endpoint : /get_user
@@ -74,7 +75,7 @@ GOALS:
 		- Request Type : POST
 		- Request:
 			- String:strategyId
-			- String:goalName
+			- String:name
 			- String:description
 		- Response:
 			- String : error
