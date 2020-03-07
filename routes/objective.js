@@ -15,7 +15,39 @@ function initialize () {
 		Response - (array of objects:Objectives)
 ***************************/
 router.post('/get_my_objectives', function(req,res){
+	let objectivesRef = db.collection("objectives");
+	let result = [];
+	let allObjectives = objectivesRef.get()
+		.then(snapshot => {
+			snapshot.forEach(doc => {
+				//string: objectiveID
+				// string: name
+				// string: startDate
+				// string: endDate
+				// string []: tags
+				// string []: assignedUsers
+				// string: description
+				// string: goalId (parent goal)
+				// bool : complete 
+				let users = doc.get("assignedUsers");
+				if (users.)
 
+				let objectiveData = {
+					objectiveId : doc.id,
+					name : doc.get("name"),
+					startDate : doc.get("startDate"),
+					endDate : doc.get("endDate"),
+					tags : doc.get("tags"),
+					assignedUsers : doc.get("assignedUsers"),
+					description : doc.get("description"),
+					goalId : doc.get("goalId"),
+					status : doc.get("status")
+
+				}
+
+				result.push(objectiveData);
+			})
+		})
 });
 
 /***************************

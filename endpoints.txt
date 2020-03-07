@@ -94,11 +94,11 @@ OBJECTIVE:
 				- string: name
 				- string: startDate
 				- string: endDate
-				- string: tags
+				- string []: tags
 				- string []: assignedUsers
 				- string: description
-				- string: goal (parent goal)
-				- bool : complete
+				- string: goalId (parent goal)
+				- int : status
 
 	Create Objective 
 		- Endpoint : /create_objective
@@ -198,15 +198,15 @@ Goal
 	string: startDate (should correspond to first start date of objectives)
 	string: endDate (should correspond to the last end date of objectives)
 Objective
-	string: objectiveID
+	string: objectiveId
 	string: name
 	string: startDate
 	string: endDate
-	string: tags
+	string []: tags
 	string []: assignedUsers
 	string: description
-	string: goal (parent goal)
-	bool : complete 
+	string: goalId (parent goal)
+	int : status 
 User
 	string: email
 	string: fname
