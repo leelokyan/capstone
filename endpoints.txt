@@ -65,7 +65,39 @@ STRATEGY:
 				- string : strategyId
 				- String : strategyName
 				- String : description
+GOALS:
+	Create Goal
+		- Endpoint : /create_goal
+		- Request Type : POST
+		- Request:
+			- String:strategyId
+			- String:name
+			- String:description
+		- Response:
+			- String : error
+			- String : goalId
 
+	Delete Goal
+		- endpoint :
+		- request type : POST
+		- request : 
+			- string : goalId
+		- response :
+			- bool : success
+			- String : error
+
+	Update Goal
+		- endpoint :
+		- request type : POST
+		- request : 
+			- string : goalId
+			- string : strategyId
+			- string : description
+			- string : name
+		- response :
+			- bool : success
+			- String : error
+			
 OBJECTIVE:
 	Get My Objectives
 		- Endpoint : /get_my_objectives
@@ -136,52 +168,6 @@ OBJECTIVE:
 		- request :
 			- string : objectiveId
 			- int : status
-		- response :
-			- bool : success
-
-GOALS:
-	Create Goal
-		- Endpoint : /create_goal
-		- Request Type : POST
-		- Request:
-			- String:strategyId
-			- String:name
-			- String:description
-		- Response:
-			- String : error
-			- String : goalId
-
-	Add Tag
-		- endpoint : /add_tag
-		- request type : POST
-		- request : 
-			- string : tagName
-		- response :
-			- bool : success
-
-	Assign Tag
-		- endpoint : /assign_tag
-		- request type : POST
-		- request : 
-			- string : tagName
-			- string : objectiveId
-		- response
-			- bool : success
-
-	Assign User
-		- endpoint : /assign_user
-		- request type : POST
-		- request :
-			- string : userId
-			- string : objectiveId
-		- response :
-			- bool : success
-
-	Delete Objective
-		- endpoint : /delete_objective
-		- request type : POST
-		- request : 
-			- string : objectiveId
 		- response :
 			- bool : success
 				
