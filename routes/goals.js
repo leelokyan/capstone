@@ -111,7 +111,45 @@ router.post('/create_goal', function(req,res){
 		);
 	}
 });
-
+/***************************
+	Delete Goal:
+		Request - (int:goalId)
+		Response - (bool:success, string: error)
+***************************/
+router.post('/delete_goal', function(req,res){
+	let goalId = req.body.goalId;
+	let response = null;
+	if(!goalId){
+		response = {
+			success : false,
+			error : "Goal id is null"			
+		};
+		res.json(response);
+	}
+	else{
+		goalRef = db.collection('goals').doc(goalId);
+		goalRef.get().then(doc => {
+			if(doc.exists){
+				let strategy = doc.data().strategy;
+				db.collection('strategies').doc(strategy).update({
+					goals : admin.firestore.FieldValue.arrayRemove(goalId)
+				});
+				goalRef.delete();
+				response = {
+					success : true,
+					error : ""			
+				};
+				res.json(response);
+			}else{
+				response = {
+					success : false,
+					error : "Goal id does not exist"			
+				};
+				res.json(response);
+			}
+		});
+	}
+});
 
 /***************************
 	Update Goal:
