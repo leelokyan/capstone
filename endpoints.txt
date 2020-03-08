@@ -65,6 +65,7 @@ STRATEGY:
 				- string : strategyId
 				- String : strategyName
 				- String : description
+				- double : completion (percentage)
 GOALS:
 	Create Goal
 		- Endpoint : /create_goal
@@ -182,7 +183,8 @@ Strategy
 	string: strategyId
 	string: name
 	string []: goals
-	string description
+	string: description
+	double: completion 
 Goal
 	string: goalId
 	string: name
