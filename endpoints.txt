@@ -138,6 +138,7 @@ OBJECTIVE:
 		- Endpoint : /create_objective
 		- request type : POST
 		- request :
+			- string : name
 			- string : goalId
 			- string[] : tags
 			- string : userId
@@ -152,6 +153,7 @@ OBJECTIVE:
 		- endpoint : /update_objective
 		- request type : POST
 		- request : 
+			- string : name
 			- string : objectiveId
 			- string [] : tags
 			- string [] : assignedUsers
