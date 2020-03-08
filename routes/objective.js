@@ -358,12 +358,80 @@ router.post('/assign_tag', function(req,res){
 /***************************
 	Assign User:
 		Request - (string:userId, string: objectiveId)
-		Response - (bool:success)
+		Response - (bool:success, string:error)
 ***************************/
 router.post('/assign_user', function(req,res) {
-
+	let userId = req.body.userId;
+	let objectiveId = req.body.objectiveId;
+	let response = null;
+	if(!objectiveId || !objectiveId){
+		response = {
+			success : false,
+			error : "Either userId or objectiveId is null"
+		}
+		res.json(response);
+	}
+	else{
+		let objRef = db.collection('objectives').doc(objectiveId);
+		objRef.get().then(doc => {
+			if(doc.exists){
+				objRef.update({
+					assignedUsers : admin.firestore.FieldValue.arrayUnion(userId)
+				})
+				response = {
+					success : true,
+					error : ""
+				};
+				res.json(response);
+			}else{
+				response = {
+					success : false,
+					error : "objectiveId does not exist"
+				}
+				res.json(response);
+			}
+		});
+	}
 });
 
+/***************************
+	Unassign User:
+		Request - (string:userId, string: objectiveId)
+		Response - (bool:success, string:error)
+***************************/
+router.post('/unassign_user', function(req,res) {
+	let userId = req.body.userId;
+	let objectiveId = req.body.objectiveId;
+	let response = null;
+	if(!objectiveId || !objectiveId){
+		response = {
+			success : false,
+			error : "Either userId or objectiveId is null"
+		}
+		res.json(response);
+	}
+	else{
+		let objRef = db.collection('objectives').doc(objectiveId);
+		objRef.get().then(doc => {
+			if(doc.exists){
+				objRef.update({
+					assignedUsers : admin.firestore.FieldValue.arrayRemove(userId)
+				})
+				response = {
+					success : true,
+					error : ""
+				};
+				res.json(response);
+			}else{
+				response = {
+					success : false,
+					error : "objectiveId does not exist"
+				}
+				res.json(response);
+			}
+		});
+	}
+});
 
 /***************************
 	Delete Objective:
