@@ -20,7 +20,7 @@ router.post('/get_my_objectives', function(req,res){
 
 	let objectivesRef = db.collection("objectives");
 	let result = [];
-	let allObjectives = objectivesRef.get()
+	let allObjectives = objectivesRef.where("assignedUsers", "array-contains", userId).get()
 		.then(snapshot => {
 			snapshot.forEach(doc => {
 				//string: objectiveID
@@ -32,8 +32,7 @@ router.post('/get_my_objectives', function(req,res){
 				// string: description
 				// string: goalId (parent goal)
 				// bool : complete 
-				let users = doc.get("assignedUsers");
-				if (users.includes(userId)) {
+			
 					let objectiveData = {
 						objectiveId : doc.id,
 						name : doc.get("name"),
@@ -44,14 +43,14 @@ router.post('/get_my_objectives', function(req,res){
 						description : doc.get("description"),
 						goalId : doc.get("goalId"),
 						status : doc.get("status")
-
-					}
+					};
+					
 
 					result.push(objectiveData);
-				}
+				});
 
 				
-			});
+			
 
 			var response = {
 				objectives : result,
