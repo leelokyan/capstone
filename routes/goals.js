@@ -120,28 +120,71 @@ router.post('/create_goal', function(req,res){
 ***************************/
 router.post('/update_goal', function(req,res){
 	let goalId = req.body.goalId;
-	let name = req.body.name;
-	let strategyId = req.body.strategyId;
-	let description = req.body.description;
+	let newName = req.body.name;
+	let newStrategyId = req.body.strategyId;
+	let newDescription = req.body.description;
+
+	let response = null;
 
 	if(!goalId){
-		let request = {
+		let response = {
 			success : false,
 			error : "Null goal id"
 		}
-		res.json(request);
+		res.json(response);
 	}
-	// else{
-	// 	let goalRef = db.collection("goals");
-	// 	let queryRef = goalRef.doc(goalId).get()
-	// 		.then(doc => {
-	// 			if(doc.exists){
-					
-	// 			}else{
-	// 				console.log("Not found");
-	// 			}
-	// 		})
-	// }
+	else{
+		let goalRef = db.collection("goals").doc(goalId);
+		goalRef.get().then(doc => {
+			if(doc.exists){
+				let update = {
+					name : newName,
+					strategy : newStrategyId,
+					description : newDescription
+				};
+				let oldStrategyId = doc.data().strategy;
+				if(!newName) update.name = doc.data().name;
+				if(!newStrategyId) update.strategy = doc.data().strategy;
+				if(!newDescription) update.description = doc.data().description;
+
+				goalRef.update(update);
+
+				if(newStrategyId){
+					let strategyRef = db.collection("strategies");
+					strategyRef.doc(newStrategyId).get()
+						.then(doc =>{
+							if(doc.exists){
+								//Add to new strategy
+								strategyRef.doc(newStrategyId).update({
+									goals : admin.firestore.FieldValue.arrayUnion(goalId)
+								});
+								//Remove from old strategy
+								strategyRef.doc(oldStrategyId).update({
+									goals: admin.firestore.FieldValue.arrayRemove(goalId)
+								});
+							}else{
+								let response = {
+									success : false,
+									error : "New strategy does not exists"
+								}
+								res.json(response);
+							}
+						});
+				}
+				let response = {
+					success : true,
+					error : ""
+				}
+				res.json(response);
+			}else{
+				response = {
+					success : false,
+					error : "goal id does not exist"
+				}
+				res.json(response);
+			}
+		});
+	}
 	
 });
 module.exports = router;
