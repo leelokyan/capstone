@@ -108,6 +108,7 @@ OBJECTIVE:
 			- object [] : objectives
 				- string: objectiveID
 				- string: name
+				- string : description
 				- string: startDate
 				- string: endDate
 				- string: tags
@@ -126,6 +127,7 @@ OBJECTIVE:
 			- object [] : objectives
 				- string: objectiveID
 				- string: name
+				- string: description
 				- string: startDate
 				- string: endDate
 				- string: tags
@@ -139,6 +141,7 @@ OBJECTIVE:
 		- request type : POST
 		- request :
 			- string : name
+			- string : description
 			- string : goalId
 			- string[] : tags
 			- string : userId
@@ -154,6 +157,7 @@ OBJECTIVE:
 		- request type : POST
 		- request : 
 			- string : name
+			- string : description
 			- string : objectiveId
 			- string [] : tags
 			- string [] : assignedUsers
