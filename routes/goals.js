@@ -17,19 +17,37 @@ const admin = require('firebase-admin');
 ***************************/
 router.post('/get_goals', function(req,res){
 	let goal = req.body.goalId;
+	let strategyId = req.body.strategyId;
 
 	let goals = [];
 	let error = null;
 	let response = null;
 
-	if(!strategy){
+	if(!strategyId){
 		response = {
-			goals : goals,
-			error : "Null strategy id"
+			success : false,
+			error : "Null strategy id",
+			goals : goals
 		}
 		res.json(response);
 	}else{
 		let goalRef = db.collection("goals");
+		let queryRef = goalRef.where('strategy','==',strategyId).get()
+		.then(snapshot =>{
+			if(snapshot.empty){
+				console.log("empty");
+			}else{
+				snapshot.forEach(doc => {
+					goals.push(doc.data());
+				});	
+				response = {
+					success : true,
+					error : "",
+					goals : goals
+				};
+				res.json(response);
+			}
+		})
 	}
 });
 
@@ -54,6 +72,7 @@ router.post('/create_goal', function(req,res){
 		//Create Goal
 		let data = {
 			name : goal,
+			strategy : strategy,
 			description : description,
 			objectives : [],
 			startDate : null,
@@ -96,10 +115,33 @@ router.post('/create_goal', function(req,res){
 
 /***************************
 	Update Goal:
-		Request - (int:goalId,string:name)
-		Response - (bool:success)
+		Request - (int:goalId, string:name, string:strategyId,string:description)
+		Response - (bool:success, string: error)
 ***************************/
 router.post('/update_goal', function(req,res){
+	let goalId = req.body.goalId;
+	let name = req.body.name;
+	let strategyId = req.body.strategyId;
+	let description = req.body.description;
 
+	if(!goalId){
+		let request = {
+			success : false,
+			error : "Null goal id"
+		}
+		res.json(request);
+	}
+	// else{
+	// 	let goalRef = db.collection("goals");
+	// 	let queryRef = goalRef.doc(goalId).get()
+	// 		.then(doc => {
+	// 			if(doc.exists){
+					
+	// 			}else{
+	// 				console.log("Not found");
+	// 			}
+	// 		})
+	// }
+	
 });
 module.exports = router;
