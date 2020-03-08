@@ -342,7 +342,26 @@ router.post('/update_objective_status', function(req,res){
 		Response - (bool:success)
 ***************************/
 router.post('/add_tag', function(req,res){
+	let tag = req.body.tagName;
+	if(!tag){
+		var response = {
+			success : false,
+			error : "tag is null"
+		}
+		res.json(response);
+	}else{
+		tagRef = db.collection('tags');
 
+		let newTag = {
+			tagName : tag
+		}
+		tagRef.doc(tag).set(newTag);
+		var response = {
+			success : true,
+			error : ""
+		}
+		res.json(response);
+	}
 });
 
 
@@ -352,7 +371,58 @@ router.post('/add_tag', function(req,res){
 		Response - (bool:success)
 ***************************/
 router.post('/assign_tag', function(req,res){
+	let tag = req.body.tagName;
+	let objective = req.body.objectiveId;
 
+	let objRef = db.collection('objectives').doc(objective);
+	objRef.get().then(doc =>{
+		if(doc.exists){
+			objRef.update({
+				tags : admin.firestore.FieldValue.arrayUnion(tag)
+			});
+			let response = {
+				success : true,
+				error : ""
+			}
+			res.send(response);
+		}else{
+			let response = {
+				success : false,
+				error : "Objective Id does not match any objective"
+			}
+			res.send(response);
+		}
+	});
+});
+
+/***************************
+	Unassign Tag:
+		Request - (string:tagName, string objectiveId)
+		Response - (bool:success)
+***************************/
+router.post('/unassign_tag', function(req,res){
+	let tag = req.body.tagName;
+	let objective = req.body.objectiveId;
+
+	let objRef = db.collection('objectives').doc(objective);
+	objRef.get().then(doc =>{
+		if(doc.exists){
+			objRef.update({
+				tags : admin.firestore.FieldValue.arrayRemove(tag)
+			});
+			let response = {
+				success : true,
+				error : ""
+			}
+			res.send(response);
+		}else{
+			let response = {
+				success : false,
+				error : "Objective Id does not match any objective"
+			}
+			res.send(response);
+		}
+	});
 });
 
 /***************************
