@@ -54,29 +54,27 @@ router.post('/get_goals', function(req,res){
 /***************************
 	Create Goal:
 		Request - (String:strategyId,String:name,String:description)
-		Response - (String:error,String:goalId)
+		Response - (String:error,Boolean:success)
 ***************************/
 router.post('/create_goal', function(req,res){
 	let strategy = req.body.strategyId;
-	let goal = req.body.name;
-	let description = req.body.description;
 
 	//Check for empty fields
-	if(!strategy || !goal || !description){
+	if(!strategy){
 		let response = {
-			error : "Strategy/goal/description is null",
-			goalId : null
+			error : "Strategy is null",
+			success : false
 		};
 		res.json(response);
 	}else{
 		//Create Goal
 		let data = {
-			name : goal,
-			strategy : strategy,
-			description : description,
+			name : req.body.name,
+			strategyId : strategy,
+			description : req.body.description,
 			objectives : [],
-			startDate : null,
-			endDate : null
+			startDate : req.body.startDate,
+			endDate : req.body.endDate
 		};
 		//Insert goal to db
 		let goalDocRef = db.collection("goals").doc();
@@ -90,7 +88,7 @@ router.post('/create_goal', function(req,res){
 			    	console.log("Failure: strategy does not exist");
 			    	var response = {
 						error : "Failure: strategy does not exist",
-						goalId : null
+						success : false
 					};
 					res.json(response);	
 			    } else {
@@ -99,8 +97,8 @@ router.post('/create_goal', function(req,res){
 						goals: admin.firestore.FieldValue.arrayUnion(goalDocRef.id)
 					});
 					var response = {
-						error : null,
-						goalId : goalDocRef.id
+						error : "",
+						success : true
 					};
 					res.json(response);	
 			    }
