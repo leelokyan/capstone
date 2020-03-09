@@ -68,6 +68,14 @@ STRATEGY:
 				- String : strategyName
 				- String : description
 				- double : completion (percentage)
+	Delete Strategy
+		- Endpoint : /delete_strategy
+		- Request Type : POST
+		- Request:
+			- String : strategyId
+		- Response:
+			- Boolean : success
+			- String : error
 GOALS:
 	Create Goal
 		- Endpoint : /create_goal
@@ -100,6 +108,14 @@ GOALS:
 		- response :
 			- bool : success
 			- String : error
+	Get Goals
+		- Endpoint : /get_goals
+		- Request Type : POST
+		- Request: 
+			- string : strategyId
+		- Response:
+			- Boolean : success
+			- string : error
 			
 OBJECTIVE:
 	Get My Objectives
