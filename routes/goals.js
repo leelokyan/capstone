@@ -13,15 +13,11 @@ const admin = require('firebase-admin');
 /***************************
 	Get Goals:
 		Request - (String:strategyId)
-		Response - (List:goals,String:error,int:percentComplete)
+		Response - (List:goals,String:error)
 ***************************/
 router.post('/get_goals', function(req,res){
-	let goal = req.body.goalId;
 	let strategyId = req.body.strategyId;
-
 	let goals = [];
-	let error = null;
-	let response = null;
 
 	if(!strategyId){
 		response = {
@@ -31,15 +27,21 @@ router.post('/get_goals', function(req,res){
 		}
 		res.json(response);
 	}else{
-		let goalRef = db.collection("goals");
-		let queryRef = goalRef.where('strategy','==',strategyId).get()
+		let goalRef = db.collection("goals").where('strategyId','==',strategyId).get()
 		.then(snapshot =>{
-			if(snapshot.empty){
-				console.log("empty");
-			}else{
-				snapshot.forEach(doc => {
+			snapshot.forEach(doc => {
+				if(doc.exists){
 					goals.push(doc.data());
-				});	
+				}
+			});	
+			if(goals.length == 0){
+				response = {
+					success : false,
+					error : "No matching strategy",
+					goals : goals
+				};
+				res.json(response);
+			}else{
 				response = {
 					success : true,
 					error : "",
@@ -78,35 +80,31 @@ router.post('/create_goal', function(req,res){
 		};
 		//Insert goal to db
 		let goalDocRef = db.collection("goals").doc();
-		let setDocRef = goalDocRef.set(data);
+		goalDocRef.set(data);
 
 		//Update strategy list
 		let strategyRef = db.collection("strategies");
-		let s = strategyRef.doc(strategy).get()
-			.then(doc => {
-				if (!doc.exists) {
-			    	console.log("Failure: strategy does not exist");
-			    	var response = {
-						error : "Failure: strategy does not exist",
-						success : false
-					};
-					res.json(response);	
-			    } else {
-					//this below adds the current user to the array of users in the document 
-					let goals = strategyRef.doc(strategy).update({
-						goals: admin.firestore.FieldValue.arrayUnion(goalDocRef.id)
-					});
-					var response = {
-						error : "",
-						success : true
-					};
-					res.json(response);	
-			    }
-			  })
-			  .catch(err => {
-			    console.log('Error getting document', err);
-			  }
-		);
+		strategyRef.doc(strategy).get().then(doc => {
+			if (!doc.exists) {
+			    var response = {
+					error : "Failure: strategy does not exist",
+					success : false
+				};
+				res.json(response);	
+			}
+			else {
+				strategyRef.doc(strategy).update({
+					goals: admin.firestore.FieldValue.arrayUnion(goalDocRef.id)
+				});
+				var response = {
+					error : "",
+					success : true
+				};
+				res.json(response);	
+			}
+		}).catch(err => {
+			console.log('Error getting document', err);
+		});
 	}
 });
 /***************************
