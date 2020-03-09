@@ -164,14 +164,6 @@ router.post('/delete_strategy',function(req,res){
 		strategyRef.doc(strategy).get().then(doc => {
 			if(doc.exists){
 				//Do we also delete goals that correspond to this strategy?
-				// db.collection('goals').where('strategy','==',strategy).get()
-				// 	.then(snapshot =>{
-				// 	snapshot.forEach(doc => {
-				// 		if(doc.exists){
-				// 			doc.delete();
-				// 		}
-				// 	});
-				// });
 
 				strategyRef.doc(strategy).delete();
 				let response = {
