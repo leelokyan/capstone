@@ -145,4 +145,49 @@ router.post('/update_strategy', function(req,res){
 	
 });
 
+/***************************
+	Delete Strategy:
+		Request - (string: strategyId)
+		Response - (bool:success, string:error)
+***************************/
+router.post('/delete_strategy',function(req,res){
+	let strategy = req.body.strategyId;
+
+	if(!strategy){
+		let response = {
+			success : false,
+			error : "sent null"
+		};
+		res.json(response);
+	}else{
+		let strategyRef = db.collection('strategies');
+		strategyRef.doc(strategy).get().then(doc => {
+			if(doc.exists){
+				//Do we also delete goals that correspond to this strategy?
+				// db.collection('goals').where('strategy','==',strategy).get()
+				// 	.then(snapshot =>{
+				// 	snapshot.forEach(doc => {
+				// 		if(doc.exists){
+				// 			doc.delete();
+				// 		}
+				// 	});
+				// });
+
+				strategyRef.doc(strategy).delete();
+				let response = {
+					success : true,
+					error : ""
+				};
+				res.json(response);
+			}else{
+				let response = {
+					success : false,
+					error : "strategy does not exist"
+				};
+				res.json(response);
+			}
+		});
+	}
+});
+
 module.exports = router;
