@@ -1,8 +1,4 @@
-ENDPOINT DECLARATIONS
-
-! Cameron Questions:
-	- How do you join a workspace? Either enter workspace name and authcode, or display all workspaces then select workspace to join and enter authcode.
-	- Do we want to pass msg by default and only have content on error
+ENDPOINTS
 
 	- Endpoint :
 	- Request Type :
@@ -19,20 +15,26 @@ USERS:
 			- String : email (email is the same as userId)
 			- String : workspacePassword
 		- Response:
-			- Boolean : success (-1 on failure)
-			- String : error (null on failure)
-
+			- Boolean : success
+			- String : error
+	Delete User:
+		- Endpoint : /delete_user
+		- Request Type : POST
+		- Request:
+			- String : email
+		- Response:	
+			- Boolean : success
+			- String : error
 	Get User:
 		- Endpoint : /get_user
 		- Request Type : POST
 		- Request : 
 			- String : email
-			- string:workspaceId
-			- string:authCode
 		- Response :
 			- String : fname
 			- String : lname
 			- String : email
+			- Boolean : success
 			- String : error
 
 STRATEGY:
