@@ -52,76 +52,71 @@ router.post('/update_password',function(req,res){
 /***************************
 	Add User:
 		Request - (String: fname, String: lname, String email, String workspacePassword)
-		Response - (String : userId)
+		Response - (Boolean: success, String : error)
 ***************************/
 router.post('/add_user',function(req,res){
-	let fname = req.body.fname;
-	let lname = req.body.lname;
 	let email = req.body.email;
 	let password = req.body.workspacePassword;
 
 	console.log("Add User");
 
-	if(!email|| !fname || !lname || !password){
-		userId = '-1';
-		error = "Invalid username or email";
-		response = {
-			sucess : false,
-			error : 'invalid name or email'
+	if(!email || !password){
+		let response = {
+			success : false,
+			error : 'Either email or password is null'
 		};
 		res.json(response);
 	}else{
-		let hash = null;
-		let workspaceRef = db.collection('workspaces').doc('access');
-		let getDoc = workspaceRef.get()
+		db.collection('workspaces').doc('access').get()
 		  .then(doc => {
-		    if (!doc.exists) {
-		      console.log('No such document!');
-		    } else {
-		      hash = doc.data().authCode;
-		      //Verify password
-				bcrypt.compare(password, hash, function(err, result) {
+		    if (doc.exists) {
+		    	let hash = doc.data().authCode;
+
+		    	//Verify password
+		    	bcrypt.compare(password, hash, function(err, result) {
 					if(result){
-						console.log('password comparision success');
 					    //Add User
-						let usersRef = db.collection('users');
-						let response = null;
-						let queryRef = usersRef.where('email','==',email).get()
+						db.collection('users').where('email','==',email).get()
 						  .then(snapshot => {
 						  	if(snapshot.empty){
-						  		console.log('Adding user: ' + email);
-								userDocRef = db.collection("users").doc();
-								console.log("id" + userDocRef.id);
-								let data = {
+						  		let data = {
 									email : email,
-									fname : fname,
-									lname : lname
+									fname : req.body.fname,
+									lname : req.body.lname
 								}
-								let setDoc = userDocRef.set(data);
-								response = {
+
+								db.collection("users").doc(email).set(data);
+								let response = {
 									success : true,
-									error : null
+									error : ""
 								};
+								res.json(response);
 						  	}else{
-						  		console.log('Error, user exists');
-								response = {
-									sucess : false,
-									error : 'User exists'
+								let response = {
+									success : false,
+									error : 'Failure: User exists'
 								};
+								res.json(response);
 						  	}
-						  	res.json(response);
 						  })
 						  .catch((err) => {
 						    console.log('Error getting documents', err);
 						});
 					}else{
 						let response = {
-						success : false,
-						error : "invalid password"
-					};
-					res.json(response);
+							success : false,
+							error : "invalid password"
+						};
+						res.json(response);
 					}
 				});
+		    } 
+		    else {
+		    	let response = {
+					success : false,
+					error : "!!! ERROR: Failed to retrieve workspace password"
+				};
+				res.json(response);
 		    }
 		  })
 		  .catch(err => {
@@ -130,30 +125,30 @@ router.post('/add_user',function(req,res){
 	}
 });
 /***************************
-	Get User Info:
+	Get User:
 		Request - (String email)
-		Response - (String: fname, String: lname, String email, String error)
+		Response - (String: fname, String: lname, String: email, Boolean: success, String: error)
 ***************************/
 router.post('/get_user',function(req,res){
 	let email = req.body.email;
-	let response = null;
 	if(!email){
-		response = {
+		let response = {
 			fname : null,
 			lname : null,
 			email : null,
+			success : false,
 			error : "No email sent"
 		};
 		res.json(response);
 	}else{
-		let usersRef = db.collection('users');
-		let queryRef = usersRef.where('email','==',email).get()
+		let usersRef = db.collection('users').where('email','==',email).get()
 		.then(snapshot =>{
 			if(snapshot.empty){
 				response = {
 					fname : null,
 					lname : null,
 					email : null,
+					success : false,
 					error : "No matching email"
 				};
 				res.json(response);
@@ -168,7 +163,8 @@ router.post('/get_user',function(req,res){
 					fname : fname,
 					lname : lname,
 					email : email,
-					error : null
+					success : true,
+					error : ""
 				};
 				res.json(response);
 			}
@@ -176,5 +172,38 @@ router.post('/get_user',function(req,res){
 	}
 });
 
+/***************************
+	Delete User:
+		Request - (String email)
+		Response - (bool: success, String error)
+***************************/
+router.post('/delete_user', function(req,res){
+	let email = req.body.email;
+	if(!email){
+		let response = {
+			success : false,
+			error: "No email passed"
+		}
+		res.json(response);
+	}else{
+		let userRef = db.collection('users').doc(email);
+		userRef.get().then(doc =>{
+			if(doc.exists){
+				userRef.delete();
+				let response = {
+					success : true,
+					error: ""
+				}
+				res.json(response);
+			}else{
+				let response = {
+					success : false,
+					error: "No matching email"
+				}
+				res.json(response);
+			}
+		})
+	}
+});
 
 module.exports = router;
