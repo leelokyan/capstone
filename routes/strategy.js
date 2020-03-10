@@ -9,6 +9,33 @@ function initialize () {
 	return db;
 }
 
+async function getCompletion (goals) {
+	let completeNum = 0;
+	let totalNum = 0;
+	for (var x of goals) {
+		//these are goalids, so need to query each of them
+		let currX = x;
+		await db.collection("objectives").where("goalId", "==", currX).get()
+			.then(snapshot => {
+				snapshot.forEach(doc => {
+					if (doc.get("status") == 1) {
+						console.log("1 " + doc.get("name"));
+						completeNum++;
+					}
+					totalNum++;
+				});			
+			});
+
+	}
+
+	let result = {
+		completeNum : completeNum,
+		totalNum : totalNum
+	};
+	return result;
+
+}
+
 /***************************
 	Get Strategies:
 		Request - 
@@ -25,27 +52,53 @@ router.post('/get_strategies', function(req,res){
 	let allStrategies = strategiesRef.get()
 		.then(snapshot => {
 			success = true;
+			let index = 0; 
+			let snapshotlength = snapshot.docs.length;
 			snapshot.forEach(doc => {
-				//name
-				//array of goals
-				//description
-				let strategyData = {
-					strategyId : doc.id,
-					name : doc.get("name"),
-					goals : doc.get("goals"),
-					description : doc.get("description")
-				};
+				//now, we need to get the % completion
+				let goals = doc.get("goals");
+				let completeNum = 0;
+				let totalNum = 0;
+				getCompletion(goals).then(completionResult => {
+					completeNum = completionResult.completeNum;
+					totalNum = completionResult.totalNum;
 
-				console.log(strategyData);
-				result.push(strategyData);
+
+					//right now this doesn't work because of the stupid async stuff
+					let completion = 0;
+					if (totalNum > 0) {
+						completion = completeNum / totalNum * 100;
+					}
+					//name
+					//array of goals
+					//description
+					//completion percentage
+					let strategyData = {
+						strategyId : doc.id,
+						name : doc.get("name"),
+						goals : doc.get("goals"),
+						description : doc.get("description"),
+						completion : completion
+					};
+
+					result.push(strategyData);
+
+					index++;
+					if (index == snapshotlength) {
+						var response = {
+							strategies : result,
+							error : error,
+							success : success
+						};
+						res.json(response);
+					}
+
+				})
+
+				
 			});
 
-			var response = {
-				strategies : result,
-				error : error,
-				success : success
-			};
-			res.json(response);
+			
 		})
 		.catch (err => {
 			console.log("Error getting documents", err);
