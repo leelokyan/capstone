@@ -1,5 +1,5 @@
 TO DO
-- supposrt completion for strategies 
+- supposrt completion for strategies  - for completion we need 3 statuses : not started, in progress, completed
 - add delete for goals, users, strategy 
 - possibly sessions
 - we need to finish objectives 
