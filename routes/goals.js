@@ -80,7 +80,6 @@ router.post('/create_goal', function(req,res){
 		};
 		//Insert goal to db
 		let goalDocRef = db.collection("goals").doc();
-		goalDocRef.set(data);
 
 		//Update strategy list
 		let strategyRef = db.collection("strategies");
@@ -93,6 +92,7 @@ router.post('/create_goal', function(req,res){
 				res.json(response);	
 			}
 			else {
+				goalDocRef.set(data);
 				strategyRef.doc(strategy).update({
 					goals: admin.firestore.FieldValue.arrayUnion(goalDocRef.id)
 				});
