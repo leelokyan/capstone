@@ -534,6 +534,43 @@ router.post('/delete_objective', function(req,res) {
 	
 });
 
+/***************************
+	Get Objectives By Tag:
+		Request - (string: tag) since the tag should be unique
+		Response - (array of objects: objectives, string: error, bool: success)
+***************************/
+router.post('/get_objectives_by_tag', function(req,res) {
+
+	let tag = req.body.tag;
+
+	let objectivesRef = db.collection("objectives");
+	let result = [];
+	let allObjectives = objectivesRef.where("tags", "array-contains", tag).get()
+		.then(snapshot => {
+			snapshot.forEach(doc => {
+				let docData = doc.data();
+				docData.objectiveId = doc.id;
+				result.push(docData);
+			});
+
+			let response = {
+				success : true,
+				error : "",
+				objectives : result		
+			};
+			res.json(response);
+		})
+		.catch(err => {
+			console.log(err);
+			var response = {
+				objectives : [],
+				error : "Error getting objectives",
+				success : false
+			};
+			res.json(response);
+		});
+
+});
 
 module.exports = router;
 
