@@ -116,37 +116,37 @@ router.post('/create_goal', function(req,res){
 ***************************/
 router.post('/delete_goal', function(req,res){
 	let goalId = req.body.goalId;
-	let response = null;
-	if(!goalId){
-		response = {
-			success : false,
-			error : "Goal id is null"			
-		};
-		res.json(response);
-	}
-	else{
-		goalRef = db.collection('goals').doc(goalId);
-		goalRef.get().then(doc => {
-			if(doc.exists){
-				let strategy = doc.data().strategy;
-				db.collection('strategies').doc(strategy).update({
-					goals : admin.firestore.FieldValue.arrayRemove(goalId)
-				});
-				goalRef.delete();
-				response = {
-					success : true,
-					error : ""			
-				};
-				res.json(response);
-			}else{
-				response = {
-					success : false,
-					error : "Goal id does not exist"			
-				};
-				res.json(response);
+	
+	let goalRef = db.collection('goals').doc(goalId);
+	goalRef.get().then(doc => {
+		if(doc.exists){
+			//Delete Goal's Objectives
+			for(let x = 0; x < doc.data().objectives.length; x++){
+				console.log(doc.data().objectives[x]);
+				db.collection('objectives').doc(doc.data().objectives[x]).delete();
 			}
-		});
-	}
+			//Remove Goal from Strategy
+			let strategy = doc.data().strategy;
+			console.log(strategy);
+			db.collection('strategies').doc(strategy).update({
+				goals : admin.firestore.FieldValue.arrayRemove(goalId)
+			});
+			//Delete Goal
+			goalRef.delete();
+
+			let response = {
+				success : true,
+				error : ""			
+			};
+			res.json(response);
+		}else{
+			let response = {
+				success : false,
+				error : "Goal id does not exist"			
+			};
+			res.json(response);
+		}
+	});
 });
 
 /***************************

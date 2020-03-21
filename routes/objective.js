@@ -509,39 +509,29 @@ router.post('/unassign_user', function(req,res) {
 ***************************/
 router.post('/delete_objective', function(req,res) {
 	let objectiveId = req.body.objectiveId;
-	console.log(objectiveId);
-	let response = null;
-	if(!objectiveId){
-		response = {
-			success : false,
-			error : "Objective id is null"			
-		};
-		res.json(response);
-	}
-	else{
-		objRef = db.collection('objectives').doc(objectiveId);
-		objRef.get().then(doc => {
-			if(doc.exists){
-				let goal = doc.data().goalId;
-				console.log(goal);
-				db.collection('goals').doc(goal).update({
-					objectives : admin.firestore.FieldValue.arrayRemove(objectiveId)
-				});
-				objRef.delete();
-				response = {
-					success : true,
-					error : ""			
-				};
-				res.json(response);
-			}else{
-				response = {
-					success : false,
-					error : "Objective id does not exist"			
-				};
-				res.json(response);
-			}
-		});
-	}
+	
+	let objRef = db.collection('objectives').doc(objectiveId);
+	objRef.get().then(doc => {
+		if(doc.exists){
+			let goal = doc.data().goalId;
+			db.collection('goals').doc(goal).update({
+				objectives : admin.firestore.FieldValue.arrayRemove(objectiveId)
+			});
+			objRef.delete();
+			let response = {
+				success : true,
+				error : ""			
+			};
+			res.json(response);
+		}else{
+			let response = {
+				success : false,
+				error : "Objective id does not exist"			
+			};
+			res.json(response);
+		}
+	});
+	
 });
 
 

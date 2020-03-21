@@ -206,24 +206,30 @@ router.post('/update_strategy', function(req,res){
 router.post('/delete_strategy',function(req,res){
 	let strategy = req.body.strategyId;
 
-	if(!strategy){
-		let response = {
-			success : false,
-			error : "sent null"
-		};
-		res.json(response);
-	}else{
-		let strategyRef = db.collection('strategies');
-		strategyRef.doc(strategy).get().then(doc => {
-			if(doc.exists){
-				//Do we also delete goals that correspond to this strategy?
-
-				strategyRef.doc(strategy).delete();
-				let response = {
-					success : true,
-					error : ""
-				};
-				res.json(response);
+	let strategyRef = db.collection('strategies');
+	strategyRef.doc(strategy).get().then(doc => {
+		if(doc.exists){
+			for(let x = 0; x < doc.data().goals.length; x++){
+				let goal = db.collection('goals').doc(doc.data().goals[x]);
+				goal.get().then(doc => {
+					if(doc.exists){
+						console.log(doc.data());
+						//Delete Objectives
+						for(let j = 0; j < doc.data().objectives.length; j++){
+							db.collection('objectives').doc(doc.data().objectives[j]).delete();
+						}
+					}
+					//Delete Goals
+					goal.delete();
+				});
+			}
+			//Delete Strategy
+			strategyRef.doc(strategy).delete();
+			let response = {
+				success : true,
+				error : ""
+			};
+			res.json(response);
 			}else{
 				let response = {
 					success : false,
@@ -231,8 +237,7 @@ router.post('/delete_strategy',function(req,res){
 				};
 				res.json(response);
 			}
-		});
-	}
+	});
 });
 
 module.exports = router;
