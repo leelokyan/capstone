@@ -31,7 +31,9 @@ router.post('/get_goals', function(req,res){
 		.then(snapshot =>{
 			snapshot.forEach(doc => {
 				if(doc.exists){
-					goals.push(doc.data());
+					let docData = doc.data();
+					docData.goalId = doc.id;
+					goals.push(docData);
 				}
 			});	
 			if(goals.length == 0){
