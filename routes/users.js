@@ -179,31 +179,37 @@ router.post('/get_user',function(req,res){
 ***************************/
 router.post('/delete_user', function(req,res){
 	let email = req.body.email;
-	if(!email){
-		let response = {
-			success : false,
-			error: "No email passed"
-		}
-		res.json(response);
-	}else{
-		let userRef = db.collection('users').doc(email);
-		userRef.get().then(doc =>{
-			if(doc.exists){
-				userRef.delete();
-				let response = {
-					success : true,
-					error: ""
+	let FieldValue = require('firebase-admin').firestore.FieldValue;
+
+	let userRef = db.collection('users').doc(email);
+	userRef.get().then(doc =>{
+		if(doc.exists){
+			//Clear assigned user
+			let objRef = db.collection('objectives').where('assignedUser','==',email).get().then(snapshot => {
+				if(!snapshot.empty){
+					snapshot.forEach(doc => {
+						let objId = doc.id;
+						db.collection('objectives').doc(objId).update({assignedUser:''});
+					});
+				}else{
+					console.log("snapshot empty");
 				}
-				res.json(response);
-			}else{
-				let response = {
-					success : false,
-					error: "No matching email"
-				}
-				res.json(response);
+			});
+			//Delete User
+			userRef.delete();
+			let response = {
+				success : true,
+				error: ""
 			}
-		})
-	}
+			res.json(response);
+		}else{
+			let response = {
+				success : false,
+				error: "No matching email"
+			}
+			res.json(response);
+		}
+	})
 });
 
 module.exports = router;
