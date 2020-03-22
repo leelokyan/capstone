@@ -18,7 +18,7 @@ async function getCompletion (goals) {
 		await db.collection("objectives").where("goalId", "==", currX).get()
 			.then(snapshot => {
 				snapshot.forEach(doc => {
-					if (doc.get("status") == 1) {
+					if (doc.get("status") == 2) {
 						console.log("1 " + doc.get("name"));
 						completeNum++;
 					}
