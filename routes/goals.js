@@ -30,7 +30,7 @@ router.post('/get_goals', function(req,res){
 		let goalRef = db.collection("goals").where('strategyId','==',strategyId).get()
 		.then(snapshot =>{
 			snapshot.forEach(doc => {
-				if(doc.exists){
+				if(doc.exists && doc.get("valid")){
 					let docData = doc.data();
 					docData.goalId = doc.id;
 					goals.push(docData);
@@ -70,7 +70,8 @@ router.post('/create_goal', function(req,res){
 		description : req.body.description,
 		objectives : [],
 		startDate : req.body.startDate,
-		endDate : req.body.endDate
+		endDate : req.body.endDate,
+		valid : true
 	};
 	
 	let goalDocRef = db.collection("goals").doc();
@@ -116,16 +117,16 @@ router.post('/delete_goal', function(req,res){
 			//Delete Goal's Objectives
 			for(let x = 0; x < doc.data().objectives.length; x++){
 				console.log(doc.data().objectives[x]);
-				db.collection('objectives').doc(doc.data().objectives[x]).delete();
+				db.collection('objectives').doc(doc.data().objectives[x]).update({valid:false});
 			}
 			//Remove Goal from Strategy
-			let strategy = doc.data().strategy;
-			console.log(strategy);
-			db.collection('strategies').doc(strategy).update({
-				goals : admin.firestore.FieldValue.arrayRemove(goalId)
-			});
+			// let strategy = doc.data().strategy;
+			// console.log(strategy);
+			// db.collection('strategies').doc(strategy).update({
+				// goals : admin.firestore.FieldValue.arrayRemove(goalId)
+			// });
 			//Delete Goal
-			goalRef.delete();
+			goalRef.update({valid:false});
 
 			let response = {
 				success : true,
