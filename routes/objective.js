@@ -32,21 +32,21 @@ router.post('/get_my_objectives', function(req,res){
 				// string: description
 				// string: goalId (parent goal)
 				// bool : complete 
-			
-					let objectiveData = {
-						objectiveId : doc.id,
-						name : doc.get("name"),
-						startDate : doc.get("startDate"),
-						endDate : doc.get("endDate"),
-						tags : doc.get("tags"),
-						assignedUser : doc.get("assignedUser"),
-						description : doc.get("description"),
-						goalId : doc.get("goalId"),
-						status : doc.get("status")
-					};
+					if(doc.get("valid")){
+						let objectiveData = {
+							objectiveId : doc.id,
+							name : doc.get("name"),
+							startDate : doc.get("startDate"),
+							endDate : doc.get("endDate"),
+							tags : doc.get("tags"),
+							assignedUser : doc.get("assignedUser"),
+							description : doc.get("description"),
+							goalId : doc.get("goalId"),
+							status : doc.get("status")
+						};
+						result.push(objectiveData);
+					}
 					
-
-					result.push(objectiveData);
 				});
 
 				
@@ -94,7 +94,7 @@ router.post('/get_objectives', function(req,res){
 				// string: goalId (parent goal)
 				// bool : complete 
 				let tempGoalId = doc.get("goalId");
-				if (tempGoalId == goalId) {
+				if (tempGoalId == goalId && doc.get("valid")) {
 					let objectiveData = {
 						objectiveId : doc.id,
 						name : doc.get("name"),
@@ -148,9 +148,13 @@ router.post('/get_objective_by_id', function(req,res){
 
 	let queryRef = db.collection("objectives").doc(objectiveId).get()
 		.then(doc => {
-			if (!doc.exists) {
-				success = "false";
-				error = "No objective with that ID";
+			if (!doc.exists || !doc.get("valid")) {
+				var response = {
+					objective : {},
+					error : "No objective with that ID",
+					success : false
+				};
+				res.json(response);
 		    } else {
 		    	let objectiveData = {
 		    		objectiveId: objectiveId,
@@ -217,7 +221,8 @@ router.post('/create_objective', function(req,res){
 			assignedUser : assignedUser,
 			startDate : startDate,
 			endDate : endDate,
-			status : 0
+			status : 0,
+			valid : true
 		}
 		let objectiveRef = db.collection("objectives").doc();
 		objectiveRef.set(objectiveData);
@@ -513,11 +518,11 @@ router.post('/delete_objective', function(req,res) {
 	let objRef = db.collection('objectives').doc(objectiveId);
 	objRef.get().then(doc => {
 		if(doc.exists){
-			let goal = doc.data().goalId;
-			db.collection('goals').doc(goal).update({
-				objectives : admin.firestore.FieldValue.arrayRemove(objectiveId)
-			});
-			objRef.delete();
+			// let goal = doc.data().goalId;
+			// db.collection('goals').doc(goal).update({
+			// 	objectives : admin.firestore.FieldValue.arrayRemove(objectiveId)
+			// });
+			objRef.update({valid:false});
 			let response = {
 				success : true,
 				error : ""			
@@ -530,6 +535,8 @@ router.post('/delete_objective', function(req,res) {
 			};
 			res.json(response);
 		}
+	}).catch(err =>{
+
 	});
 	
 });
@@ -548,9 +555,11 @@ router.post('/get_objectives_by_tag', function(req,res) {
 	let allObjectives = objectivesRef.where("tags", "array-contains", tag).get()
 		.then(snapshot => {
 			snapshot.forEach(doc => {
-				let docData = doc.data();
-				docData.objectiveId = doc.id;
-				result.push(docData);
+				if(doc.get("valid")){
+					let docData = doc.data();
+					docData.objectiveId = doc.id;
+					result.push(docData);
+				}
 			});
 
 			let response = {
