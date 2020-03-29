@@ -237,7 +237,7 @@ router.post('/get_all_users', function(req,res){
 			res.json(response);
 		}).catch(err => {
 			let response = {
-				objectives : result,
+				users : result,
 				error : "Error getting users",
 				success : false
 			}
