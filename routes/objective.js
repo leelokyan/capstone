@@ -20,7 +20,7 @@ router.post('/get_my_objectives', function(req,res){
 
 	let objectivesRef = db.collection("objectives");
 	let result = [];
-	let allObjectives = objectivesRef.where("assignedUser", "==", userId).get()
+	let allObjectives = objectivesRef.where("assignedUsers", "array-contains", userId).get()
 		.then(snapshot => {
 			snapshot.forEach(doc => {
 				//string: objectiveID
@@ -28,25 +28,24 @@ router.post('/get_my_objectives', function(req,res){
 				// string: startDate
 				// string: endDate
 				// string []: tags
-				// string : assignedUser
+				// string []: assignedUsers
 				// string: description
 				// string: goalId (parent goal)
 				// bool : complete 
-			
+		
 					let objectiveData = {
 						objectiveId : doc.id,
 						name : doc.get("name"),
 						startDate : doc.get("startDate"),
 						endDate : doc.get("endDate"),
 						tags : doc.get("tags"),
-						assignedUser : doc.get("assignedUser"),
+						assignedUsers : doc.get("assignedUsers"),
 						description : doc.get("description"),
 						goalId : doc.get("goalId"),
 						status : doc.get("status")
 					};
-					
 
-					result.push(objectiveData);
+					
 				});
 
 				
@@ -89,19 +88,19 @@ router.post('/get_objectives', function(req,res){
 				// string: startDate
 				// string: endDate
 				// string []: tags
-				// string : assignedUser
+				// string []: assignedUsers
 				// string: description
 				// string: goalId (parent goal)
 				// bool : complete 
 				let tempGoalId = doc.get("goalId");
-				if (tempGoalId == goalId) {
+				if (tempGoalId == goalId && doc.get("valid")) {
 					let objectiveData = {
 						objectiveId : doc.id,
 						name : doc.get("name"),
 						startDate : doc.get("startDate"),
 						endDate : doc.get("endDate"),
 						tags : doc.get("tags"),
-						assignedUser : doc.get("assignedUser"),
+						assignedUsers : doc.get("assignedUsers"),
 						description : doc.get("description"),
 						goalId : doc.get("goalId"),
 						status : doc.get("status")
@@ -137,7 +136,7 @@ router.post('/get_objectives', function(req,res){
 		Response - (bool:success,string:error, 
 		objective: {
 			string:objectiveId, string:goalId, string:name, string: description, array of strings:tags, 
-			string: assignedUser, string:startDate, string:endDate
+			string []: assignedUsers, string:startDate, string:endDate
 		})
 ***************************/
 router.post('/get_objective_by_id', function(req,res){
@@ -148,16 +147,20 @@ router.post('/get_objective_by_id', function(req,res){
 
 	let queryRef = db.collection("objectives").doc(objectiveId).get()
 		.then(doc => {
-			if (!doc.exists) {
-				success = "false";
-				error = "No objective with that ID";
+			if (!doc.exists || !doc.get("valid")) {
+				var response = {
+					objective : {},
+					error : "No objective with that ID",
+					success : false
+				};
+				res.json(response);
 		    } else {
 		    	let objectiveData = {
 		    		objectiveId: objectiveId,
 		    		name: doc.get("name"),
 		    		description: doc.get("description"),
 		    		tags: doc.get("tags"),
-		    		assignedUser: doc.get("assignedUser"),
+		    		assignedUsers : doc.get("assignedUsers"),
 		    		startDate: doc.get("startDate"),
 		    		endDate: doc.get("endDate")
 		    	}
@@ -185,7 +188,7 @@ router.post('/get_objective_by_id', function(req,res){
 /***************************
 	Create Objective:
 		Request - (string:goalId, string:name, string: description, array of strings:tags, 
-			strings: assignedUser, string:startDate, string:endDate)
+			strings []: assignedUsers, string:startDate, string:endDate)
 		Response - (string:objectiveId, bool:success, string:error)
 
 		NOTE : if it's optional for the user to pass in some of these fields, jsut send EMPTY STRINGS or EMPTY ARRAY ([])
@@ -195,7 +198,7 @@ router.post('/create_objective', function(req,res){
 	let description = req.body.description;
 	let goalId = req.body.goalId;
 	let tags = req.body.tags;
-	let assignedUser = req.body.assignedUser;
+	let assignedUsers = req.body.assignedUsers;
 	let startDate = req.body.startDate;
 	let endDate = req.body.endDate;
 
@@ -214,10 +217,11 @@ router.post('/create_objective', function(req,res){
 			description : description,
 			goalId : goalId,
 			tags: tags,
-			assignedUser : assignedUser,
+			assignedUsers : assignedUsers,
 			startDate : startDate,
 			endDate : endDate,
-			status : 0
+			status : 0,
+			valid : true
 		}
 		let objectiveRef = db.collection("objectives").doc();
 		objectiveRef.set(objectiveData);
@@ -236,7 +240,7 @@ router.post('/create_objective', function(req,res){
 
 /***************************
 	Update Objective:
-		Request - (string:objectiveId, string: description, string:name, string [] :tags, string :assignedUser, 
+		Request - (string:objectiveId, string: description, string:name, string [] :tags, string []:assignedUsers, 
 			string:startDate, string:endDate, int:status)
 		Response - (bool:success,string:error)
 ***************************/
@@ -245,7 +249,7 @@ router.post('/update_objective', function(req,res){
 	let name = req.body.name;
 	let description = req.body.description;
 	let tags = req.body.tags;
-	let assignedUser = req.body.assignedUser;
+	let assignedUsers = req.body.assignedUsers;
 	let startDate = req.body.startDate;
 	let endDate = req.body.endDate;
 	let status = req.body.status;
@@ -268,12 +272,12 @@ router.post('/update_objective', function(req,res){
 			}
 			else {
 
-				//update the strategy
+				//update the objective
 				db.collection("objectives").doc(objectiveId).update( {
 					name : name,
 					description : description,
 					tags : tags,
-					assignedUser : assignedUser,
+					assignedUsers : assignedUsers,
 					startDate : startDate,
 					endDate : endDate,
 					status : status
@@ -445,7 +449,7 @@ router.post('/assign_user', function(req,res) {
 		objRef.get().then(doc => {
 			if(doc.exists){
 				objRef.update({
-					assignedUser : userId
+					assignedUsers : admin.firestore.FieldValue.arrayUnion(userId)
 				})
 				response = {
 					success : true,
@@ -484,7 +488,7 @@ router.post('/unassign_user', function(req,res) {
 		objRef.get().then(doc => {
 			if(doc.exists){
 				objRef.update({
-					assignedUser : null
+					assignedUsers : admin.firestore.FieldValue.arrayRemove(userId)
 				})
 				response = {
 					success : true,
@@ -513,11 +517,11 @@ router.post('/delete_objective', function(req,res) {
 	let objRef = db.collection('objectives').doc(objectiveId);
 	objRef.get().then(doc => {
 		if(doc.exists){
-			let goal = doc.data().goalId;
-			db.collection('goals').doc(goal).update({
-				objectives : admin.firestore.FieldValue.arrayRemove(objectiveId)
-			});
-			objRef.delete();
+			// let goal = doc.data().goalId;
+			// db.collection('goals').doc(goal).update({
+			// 	objectives : admin.firestore.FieldValue.arrayRemove(objectiveId)
+			// });
+			objRef.update({valid:false});
 			let response = {
 				success : true,
 				error : ""			
@@ -530,6 +534,8 @@ router.post('/delete_objective', function(req,res) {
 			};
 			res.json(response);
 		}
+	}).catch(err =>{
+
 	});
 	
 });
@@ -548,9 +554,11 @@ router.post('/get_objectives_by_tag', function(req,res) {
 	let allObjectives = objectivesRef.where("tags", "array-contains", tag).get()
 		.then(snapshot => {
 			snapshot.forEach(doc => {
-				let docData = doc.data();
-				docData.objectiveId = doc.id;
-				result.push(docData);
+				if(doc.get("valid")){
+					let docData = doc.data();
+					docData.objectiveId = doc.id;
+					result.push(docData);
+				}
 			});
 
 			let response = {
@@ -570,6 +578,34 @@ router.post('/get_objectives_by_tag', function(req,res) {
 			res.json(response);
 		});
 
+});
+/***************************
+	Get All Tags:
+		Request - 
+		Response - (array of tags: tags, string: error, bool: success)
+***************************/
+router.post('/get_all_tags', function(req,res){
+	let result = [];
+	let tagRef = db.collection("tags").get()
+		.then(snapshot =>{
+			snapshot.forEach(doc =>{
+				result.push(doc.get("tagName"));
+			});
+			let response = {
+				tags : result,
+				error : "",
+				success : true
+			};
+			res.json(response);
+		}).catch(err => {
+			console.log(err);
+			let response = {
+				tags : result,
+				error : "Error getting tags",
+				success : false
+			};
+			res.json(response);
+		});
 });
 
 module.exports = router;

@@ -30,7 +30,7 @@ router.post('/get_goals', function(req,res){
 		let goalRef = db.collection("goals").where('strategyId','==',strategyId).get()
 		.then(snapshot =>{
 			snapshot.forEach(doc => {
-				if(doc.exists){
+				if(doc.exists && doc.get("valid")){
 					let docData = doc.data();
 					docData.goalId = doc.id;
 					goals.push(docData);
@@ -62,52 +62,46 @@ router.post('/get_goals', function(req,res){
 ***************************/
 router.post('/create_goal', function(req,res){
 	let strategy = req.body.strategyId;
+	
+	//Create Goal
+	let data = {
+		name : req.body.name,
+		strategyId : strategy,
+		description : req.body.description,
+		objectives : [],
+		startDate : req.body.startDate,
+		endDate : req.body.endDate,
+		valid : true
+	};
+	
+	let goalDocRef = db.collection("goals").doc();
 
-	//Check for empty fields
-	if(!strategy){
-		let response = {
-			error : "Strategy is null",
-			success : false
-		};
-		res.json(response);
-	}else{
-		//Create Goal
-		let data = {
-			name : req.body.name,
-			strategyId : strategy,
-			description : req.body.description,
-			objectives : [],
-			startDate : req.body.startDate,
-			endDate : req.body.endDate
-		};
-		//Insert goal to db
-		let goalDocRef = db.collection("goals").doc();
-
-		//Update strategy list
-		let strategyRef = db.collection("strategies");
-		strategyRef.doc(strategy).get().then(doc => {
-			if (!doc.exists) {
-			    var response = {
-					error : "Failure: strategy does not exist",
-					success : false
-				};
-				res.json(response);	
-			}
-			else {
-				goalDocRef.set(data);
-				strategyRef.doc(strategy).update({
-					goals: admin.firestore.FieldValue.arrayUnion(goalDocRef.id)
-				});
-				var response = {
-					error : "",
-					success : true
-				};
-				res.json(response);	
-			}
-		}).catch(err => {
-			console.log('Error getting document', err);
-		});
-	}
+	//Update strategy list
+	let strategyRef = db.collection("strategies");
+	strategyRef.doc(strategy).get().then(doc => {
+		if (!doc.exists) {
+		    var response = {
+				error : "Failure: strategy does not exist",
+				goalId : null,
+				success : false
+			};
+			res.json(response);	
+		}
+		else {
+			goalDocRef.set(data);
+			strategyRef.doc(strategy).update({
+				goals: admin.firestore.FieldValue.arrayUnion(goalDocRef.id)
+			});
+			var response = {
+				error : "",
+				goalId : goalDocRef.id,
+				success : true
+			};
+			res.json(response);	
+		}
+	}).catch(err => {
+		console.log('Error getting document', err);
+	});
 });
 /***************************
 	Delete Goal:
@@ -123,16 +117,16 @@ router.post('/delete_goal', function(req,res){
 			//Delete Goal's Objectives
 			for(let x = 0; x < doc.data().objectives.length; x++){
 				console.log(doc.data().objectives[x]);
-				db.collection('objectives').doc(doc.data().objectives[x]).delete();
+				db.collection('objectives').doc(doc.data().objectives[x]).update({valid:false});
 			}
 			//Remove Goal from Strategy
-			let strategy = doc.data().strategy;
-			console.log(strategy);
-			db.collection('strategies').doc(strategy).update({
-				goals : admin.firestore.FieldValue.arrayRemove(goalId)
-			});
+			// let strategy = doc.data().strategy;
+			// console.log(strategy);
+			// db.collection('strategies').doc(strategy).update({
+				// goals : admin.firestore.FieldValue.arrayRemove(goalId)
+			// });
 			//Delete Goal
-			goalRef.delete();
+			goalRef.update({valid:false});
 
 			let response = {
 				success : true,

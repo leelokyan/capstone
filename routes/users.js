@@ -212,4 +212,38 @@ router.post('/delete_user', function(req,res){
 	})
 });
 
+/***************************
+	Get All Users:
+		Request - 
+		Response - (bool: success, String error, User[] users)
+***************************/
+router.post('/get_all_users', function(req,res){
+	let result = [];
+	let userRef = db.collection('users').get()
+		.then(snapshot => {
+			snapshot.forEach(doc => {
+				let userData = {
+					email : doc.get('email'),
+					fname : doc.get('fname'),
+					lname : doc.get('lname')
+				}
+				result.push(userData);
+			})
+			let response = {
+				users : result,
+				error : "",
+				success : true
+			};
+			res.json(response);
+		}).catch(err => {
+			let response = {
+				users : result,
+				error : "Error getting users",
+				success : false
+			}
+			res.json(response);
+		});
+});
+
+
 module.exports = router;
