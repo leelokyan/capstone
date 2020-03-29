@@ -36,6 +36,17 @@ USERS:
 			- String : email
 			- Boolean : success
 			- String : error
+	Get All Users:
+		- Endpoint : /get_all_users
+		- Request Type : POST
+		- Request :
+		- Response :
+			- Array[Users] : users
+				- email
+				- fname
+				-lname
+			- Boolean : success
+			- String error
 
 STRATEGY:
 	Create Strategy
@@ -195,6 +206,15 @@ OBJECTIVE:
 			- int : status
 		- response :
 			- bool : success
+	
+	Get All Tags
+		- endpoint : /get_all_tags
+		- request type : POST
+		- Request
+		- Response :
+			- String[] : tags,
+			- Boolean : success,
+			- String : error
 				
 object structures
 Strategy
