@@ -580,6 +580,34 @@ router.post('/get_objectives_by_tag', function(req,res) {
 		});
 
 });
+/***************************
+	Get All Tags:
+		Request - 
+		Response - (array of tags: tags, string: error, bool: success)
+***************************/
+router.post('/get_all_tags', function(req,res){
+	let result = [];
+	let tagRef = db.collection("tags").get()
+		.then(snapshot =>{
+			snapshot.forEach(doc =>{
+				result.push(doc.get("tagName"));
+			});
+			let response = {
+				tags : result,
+				error : "",
+				success : true
+			};
+			res.json(response);
+		}).catch(err => {
+			console.log(err);
+			let response = {
+				tags : result,
+				error : "Error getting tags",
+				success : false
+			};
+			res.json(response);
+		});
+});
 
 module.exports = router;
 
