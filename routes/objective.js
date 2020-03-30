@@ -228,6 +228,11 @@ router.post('/create_objective', function(req,res){
 		objectiveRef.set(objectiveData);
 
 		objectiveId = objectiveRef.id;
+		// Add tags to tag collection
+		let tagRef = db.collection("tags");
+		for(let t in tags){
+			tagRef.doc(tags[t]).set({tagName:tags[t]});
+		}
 	}
 
 	var response = {
