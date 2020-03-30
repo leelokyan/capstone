@@ -89,9 +89,10 @@ router.post('/get_strategies', function(req,res){
 						description : doc.get("description"),
 						completion : completion
 					};
-
-					result.push(strategyData);
-
+					if(doc.get('valid')){
+						result.push(strategyData);
+					}
+					
 					index++;
 					if (index == snapshotlength) {
 						var response = {
@@ -144,7 +145,8 @@ router.post('/create_strategy', function(req,res){
 		let strategyData = {
 			name : name,
 			description : description,
-			goals : []
+			goals : [],
+			valid : true
 		}
 		let strategyRef = db.collection("strategies").doc();
 		strategyRef.set(strategyData);
@@ -225,15 +227,18 @@ router.post('/delete_strategy',function(req,res){
 						console.log(doc.data());
 						//Delete Objectives
 						for(let j = 0; j < doc.data().objectives.length; j++){
-							db.collection('objectives').doc(doc.data().objectives[j]).delete();
+							// db.collection('objectives').doc(doc.data().objectives[j]).delete();
+							db.collection('objectives').doc(doc.data().objectives[j]).update({valid:false})
 						}
 					}
 					//Delete Goals
-					goal.delete();
+					// goal.delete();
+					goal.update({valid:false})
 				});
 			}
 			//Delete Strategy
-			strategyRef.doc(strategy).delete();
+			// strategyRef.doc(strategy).delete();
+			strategyRef.doc(strategy).update({valid:false});
 			let response = {
 				success : true,
 				error : ""
