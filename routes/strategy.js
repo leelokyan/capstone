@@ -54,6 +54,15 @@ router.post('/get_strategies', function(req,res){
 			success = true;
 			let index = 0; 
 			let snapshotlength = snapshot.docs.length;
+			if (snapshotlength == 0) {
+				var response = {
+					strategies : [],
+					error : "",
+					success : success
+				};
+				res.json(response);
+
+			}
 			snapshot.forEach(doc => {
 				//now, we need to get the % completion
 				let goals = doc.get("goals");

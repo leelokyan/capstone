@@ -80,6 +80,8 @@ router.post('/get_objectives', function(req,res){
 
 	let objectivesRef = db.collection("objectives");
 	let result = [];
+	let goal = ""; //goal name
+	let strategy = ""; //strategy name
 	let allObjectives = objectivesRef.get()
 		.then(snapshot => {
 			snapshot.forEach(doc => {
@@ -113,12 +115,53 @@ router.post('/get_objectives', function(req,res){
 				
 			});
 
-			var response = {
-				objectives : result,
-				error : "",
-				success : true
-			};
-			res.json(response);
+			let goalRef = db.collection("goals").doc(goalId).get()
+				.then(doc => {
+					let data = doc.data();
+					goal = data.name;
+					//now get strategy
+
+					let stratRef = db.collection("strategies").doc(data.strategyId).get()
+						.then(doc => {
+							let stratDat = doc.data();
+							strategy = stratDat.name;
+
+							var response = {
+								goal : goal,
+								strategy : strategy,
+								objectives : result,
+								error : "",
+								success : true
+							};
+							res.json(response);
+
+						})
+						.catch( err => {
+							console.log(err);
+							var response = {
+								goal : goal,
+								strategy : strategy,
+								objectives : [],
+								error : "Error getting objectives",
+								success : false
+							};
+							res.json(response);
+						});
+
+				})
+				.catch(err => {
+					console.log(err);
+					var response = {
+						goal : goal,
+						strategy : strategy,
+						objectives : [],
+						error : "Error getting objectives",
+						success : false
+					};
+					res.json(response);
+				});
+
+			
 		})
 		.catch(err => {
 			var response = {
@@ -197,8 +240,14 @@ router.post('/create_objective', function(req,res){
 	let name = req.body.name;
 	let description = req.body.description;
 	let goalId = req.body.goalId;
-	let tags = req.body.tags;
-	let assignedUsers = req.body.assignedUsers;
+	let tags = null;
+	if (req.body.tags != null) {
+		tags = req.body.tags;
+	}
+	let assignedUsers = null;
+	if (req.body.assignedUsers != null) {
+		assignedUsers = req.body.assignedUsers;
+	}
 	let startDate = req.body.startDate;
 	let endDate = req.body.endDate;
 
@@ -216,8 +265,8 @@ router.post('/create_objective', function(req,res){
 			name : name,
 			description : description,
 			goalId : goalId,
-			tags: tags,
-			assignedUsers : assignedUsers,
+			tags: null,
+			assignedUsers : null,
 			startDate : startDate,
 			endDate : endDate,
 			status : 0,
