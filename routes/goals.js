@@ -18,7 +18,7 @@ const admin = require('firebase-admin');
 router.post('/get_goals', function(req,res){
 	let strategyId = req.body.strategyId;
 	let goals = [];
-
+	let strategy = "";
 	if(!strategyId){
 		response = {
 			success : false,
@@ -38,20 +38,45 @@ router.post('/get_goals', function(req,res){
 			});	
 			if(goals.length == 0){
 				response = {
+					strategy : strategy,
 					success : false,
 					error : "No matching strategy",
 					goals : goals
 				};
 				res.json(response);
 			}else{
-				response = {
-					success : true,
-					error : "",
-					goals : goals
-				};
-				res.json(response);
+				let stratRef = db.collection("strategies").doc(strategyId).get()
+					.then(doc => {
+						response = {
+							strategy : doc.data().name,
+							success : true,
+							error : "",
+							goals : goals
+						};
+						res.json(response);
+					})
+					.catch ( err => {
+						response = {
+							strategy : strategy,
+							success : false,
+							error : err,
+							goals : goals
+						};
+						res.json(response);
+					});
+				
 			}
 		})
+		.catch ( err => {
+			response = {
+				strategy : strategy,
+				success : false,
+				error : err,
+				goals : goals
+			};
+			res.json(response);
+		});
+	
 	}
 });
 
