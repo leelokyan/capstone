@@ -285,6 +285,7 @@ router.post('/create_objective', function(req,res){
 		for(let t in tags){
 			tagRef.doc(tags[t]).set({tagName:tags[t]});
 		}
+
 		//Update Goal's Objective List
 		let goalRef = db.collection("goals").doc(goalId);
 		goalRef.get().then(doc =>{
