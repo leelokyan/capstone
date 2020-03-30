@@ -82,7 +82,8 @@ router.post('/add_user',function(req,res){
 						  		let data = {
 									email : email,
 									fname : req.body.fname,
-									lname : req.body.lname
+									lname : req.body.lname,
+									valid : true
 								}
 
 								db.collection("users").doc(email).set(data);
@@ -101,6 +102,11 @@ router.post('/add_user',function(req,res){
 						  })
 						  .catch((err) => {
 						    console.log('Error getting documents', err);
+						    let response = {
+								success : false,
+								error : "Error getting user documents"
+							};
+							res.json(response);
 						});
 					}else{
 						let response = {
@@ -154,20 +160,38 @@ router.post('/get_user',function(req,res){
 				res.json(response);
 			}else{
 				let fname = null;
-				let lname = null;
 				snapshot.forEach(doc => {
-					fname = doc.data().fname;
-					lname = doc.data().lname;
+					if(doc.get('valid')){
+						response = {
+							fname : doc.data().fname,
+							lname : doc.data().lname,
+							email : email,
+							success : true,
+							error : ""
+						};
+						res.json(response);
+					}else{
+						response = {
+							fname : null,
+							lname : null,
+							email : null,
+							success : false,
+							error : "Email is no longer valid user"
+						};
+						res.json(response);
+					}
 			    });
-				response = {
-					fname : fname,
-					lname : lname,
-					email : email,
-					success : true,
-					error : ""
-				};
-				res.json(response);
 			}
+		}).catch(err =>{
+			console.log(err);
+			let response = {
+					fname : null,
+					lname : null,
+					email : null,
+					success : false,
+					error : "Error getting users ref"
+			};
+			res.json(response);
 		})
 	}
 });
@@ -189,14 +213,17 @@ router.post('/delete_user', function(req,res){
 				if(!snapshot.empty){
 					snapshot.forEach(doc => {
 						let objId = doc.id;
-						db.collection('objectives').doc(objId).update({assignedUser:''});
+						// db.collection('objectives').doc(objId).update({assignedUser:''});
+						db.collection('objectives').doc(objId).update({
+							objectives : admin.firestore.FieldValue.arrayRemove(email)
+						});
 					});
 				}else{
 					console.log("snapshot empty");
 				}
 			});
 			//Delete User
-			userRef.delete();
+			userRef.update({valid: false});
 			let response = {
 				success : true,
 				error: ""
@@ -222,12 +249,14 @@ router.post('/get_all_users', function(req,res){
 	let userRef = db.collection('users').get()
 		.then(snapshot => {
 			snapshot.forEach(doc => {
-				let userData = {
-					email : doc.get('email'),
-					fname : doc.get('fname'),
-					lname : doc.get('lname')
+				if(doc.get('valid')){
+					let userData = {
+						email : doc.get('email'),
+						fname : doc.get('fname'),
+						lname : doc.get('lname')
+					}
+					result.push(userData);
 				}
-				result.push(userData);
 			})
 			let response = {
 				users : result,
