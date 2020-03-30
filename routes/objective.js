@@ -259,6 +259,10 @@ router.post('/create_objective', function(req,res){
 		objectiveId = "";
 		error = 'Create objective error - missing name';
 		success = false;
+	}else if(!goalId){
+		objectiveId = "";
+		error = 'Create objective error - missing goalId';
+		success = false;
 	}else{
 		//Database call
 		let objectiveData = {
@@ -281,6 +285,25 @@ router.post('/create_objective', function(req,res){
 		for(let t in tags){
 			tagRef.doc(tags[t]).set({tagName:tags[t]});
 		}
+
+		//Update Goal's Objective List
+		let goalRef = db.collection("goals").doc(goalId);
+		goalRef.get().then(doc =>{
+			if(!doc.exists){
+				objectiveId = "";
+				error = 'Create objective error - unable to find goal with matching id';
+				success = false;
+			}else{
+				goalRef.update({
+					objectives: admin.firestore.FieldValue.arrayUnion(objectiveId)
+				})
+			}
+		}).catch(err =>{
+			objectiveId = false;
+			error = "Create objective error - error updating goal's objective list";
+			success = false;
+		});
+
 	}
 
 	var response = {
