@@ -32,7 +32,7 @@ router.post('/get_my_objectives', function(req,res){
 				// string: description
 				// string: goalId (parent goal)
 				// bool : complete 
-		
+				if(doc.get("valid")){
 					let objectiveData = {
 						objectiveId : doc.id,
 						name : doc.get("name"),
@@ -44,7 +44,8 @@ router.post('/get_my_objectives', function(req,res){
 						goalId : doc.get("goalId"),
 						status : doc.get("status")
 					};
-
+					result.push(objectiveData);
+				}
 					
 				});
 
