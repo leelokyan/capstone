@@ -117,7 +117,7 @@ router.post('/create_goal', function(req,res){
 			strategyRef.doc(strategy).update({
 				goals: admin.firestore.FieldValue.arrayUnion(goalDocRef.id)
 			});
-			var response = {
+			let response = {
 				error : "",
 				goalId : goalDocRef.id,
 				success : true
@@ -126,6 +126,12 @@ router.post('/create_goal', function(req,res){
 		}
 	}).catch(err => {
 		console.log('Error getting document', err);
+		let response = {
+			error : "Error: error getting goal document",
+			goalId : null,
+			success : false
+		}
+		res.json(response);
 	});
 });
 /***************************
@@ -165,6 +171,13 @@ router.post('/delete_goal', function(req,res){
 			};
 			res.json(response);
 		}
+	}).catch(err => {
+		console.log("Error geting goal document");
+		let response = {
+			success : false,
+			error : "Error getting goal document"
+		};
+		res.json(response);
 	});
 });
 
@@ -238,6 +251,12 @@ router.post('/update_goal', function(req,res){
 				}
 				res.json(response);
 			}
+		}).catch(err => {
+			let response = {
+				success : false,
+				error : "Error getting goals document"
+			};
+			res.json(response);
 		});
 	}
 	
