@@ -127,6 +127,11 @@ router.post('/add_user',function(req,res){
 		  })
 		  .catch(err => {
 		    console.log('Error getting document', err);
+		    let response = {
+		    	success : false,
+		    	error : "Error: error getting document"
+		    };
+		    res.json(response);
 		  });
 	}
 });
