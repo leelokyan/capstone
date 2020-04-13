@@ -592,6 +592,14 @@ router.post('/unassign_user', function(req,res) {
 router.post('/delete_objective', function(req,res) {
 	let objectiveId = req.body.objectiveId;
 	
+	if(!objectiveId){
+		let response ={
+			success : false,
+			error : "Error: no objective id passed"
+		};
+		res.json(response);
+	}
+
 	let objRef = db.collection('objectives').doc(objectiveId);
 	objRef.get().then(doc => {
 		if(doc.exists){
@@ -613,7 +621,11 @@ router.post('/delete_objective', function(req,res) {
 			res.json(response);
 		}
 	}).catch(err =>{
-
+		let response = {
+			success : false,
+			error : "Error getting objectives doc"
+		};
+		res.json(response);
 	});
 	
 });
