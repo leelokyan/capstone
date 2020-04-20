@@ -515,7 +515,7 @@ router.post('/assign_user', function(req,res) {
 	let userId = req.body.userId;
 	let objectiveId = req.body.objectiveId;
 	let response = null;
-	if(!objectiveId || !objectiveId){
+	if(!userId || !objectiveId){
 		response = {
 			success : false,
 			error : "Either userId or objectiveId is null"
@@ -603,10 +603,6 @@ router.post('/delete_objective', function(req,res) {
 	let objRef = db.collection('objectives').doc(objectiveId);
 	objRef.get().then(doc => {
 		if(doc.exists){
-			// let goal = doc.data().goalId;
-			// db.collection('goals').doc(goal).update({
-			// 	objectives : admin.firestore.FieldValue.arrayRemove(objectiveId)
-			// });
 			objRef.update({valid:false});
 			let response = {
 				success : true,
