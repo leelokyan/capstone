@@ -11,43 +11,34 @@ function initialize () {
 	return db;
 }
 
-function userExists (email,addUser){
-	let usersRef = db.collection('users');
-
-	let queryRef = usersRef.where('email','==',email).get()
-	  .then(snapshot => {
-	  	if(snapshot.empty){
-	  		console.log('No matching user');
-	  	}else{
-	  		console.log('matching user found');
-	  		return true;
-	  	}
-	  })
-	  .catch((err) => {
-	    console.log('Error getting documents', err);
-	});
-}
-
-function updatePassword(password){
-	let authCode = null;
-	bcrypt.genSalt(saltRounds, function(err, salt) {
-	    bcrypt.hash(password, salt, function(err, hash) {
-	        authCode = hash;
-	        let data = {
-				authCode : authCode
-			};
-			let setDoc = db.collection('workspaces').doc('access').set(data);
-	    });
-	});	
-}
-
+/***************************
+	Update Password:
+		Request - (String: password)
+		Response - (Boolean: success, String : error)
+***************************/
 router.post('/update_password',function(req,res){
 	let password = req.body.password;
-	updatePassword(password);
-	let response = {
-		success : true
+	if(!password){
+		let response= {
+			success : false,
+			error : "Error: no password sent"
+		};
+		res.json(response);
+	}else{
+		bcrypt.genSalt(saltRounds, function(err, salt) {
+		    bcrypt.hash(password, salt, function(err, hash) {
+		        let data = {
+					authCode : hash
+				};
+				let setDoc = db.collection('workspaces').doc('access').set(data);
+				let response = {
+					success : true,
+					error : ""
+				};
+				res.json(response);
+		    });
+		});	
 	}
-	res.json(response);
 });
 /***************************
 	Add User:
@@ -210,38 +201,57 @@ router.post('/delete_user', function(req,res){
 	let email = req.body.email;
 	let FieldValue = require('firebase-admin').firestore.FieldValue;
 
-	let userRef = db.collection('users').doc(email);
-	userRef.get().then(doc =>{
-		if(doc.exists){
-			//Clear assigned user
-			let objRef = db.collection('objectives').where('assignedUser','==',email).get().then(snapshot => {
-				if(!snapshot.empty){
-					snapshot.forEach(doc => {
-						let objId = doc.id;
-						// db.collection('objectives').doc(objId).update({assignedUser:''});
-						db.collection('objectives').doc(objId).update({
-							objectives : admin.firestore.FieldValue.arrayRemove(email)
+	// Null Value Check
+	if(!email){
+		let response = {
+			success : false,
+			error : "Error: no email sent"
+		};
+		res.json(response);
+	}
+	else{
+		let userRef = db.collection('users').doc(email).get()
+		.then(doc =>{
+			if(doc.exists){
+				//Clear assigned user
+				let objRef = db.collection('objectives').where('assignedUser','==',email).get()
+				.then(snapshot => {
+					if(!snapshot.empty){
+						snapshot.forEach(doc => {
+							db.collection('objectives').doc(doc.id).update({
+								objectives : admin.firestore.FieldValue.arrayRemove(email)
+							});
 						});
-					});
-				}else{
-					console.log("snapshot empty");
+					}
+				}).catch(err => {
+					let response = {
+						success : false,
+						error : "Error: error getting objectives doc"
+					};
+					res.json(response);
+				});
+				//Delete User
+				userRef.update({valid: false});
+				let response = {
+					success : true,
+					error: ""
 				}
-			});
-			//Delete User
-			userRef.update({valid: false});
-			let response = {
-				success : true,
-				error: ""
+				res.json(response);
+			}else{
+				let response = {
+					success : false,
+					error: "Error: Email doesn't match existing user"
+				}
+				res.json(response);
 			}
-			res.json(response);
-		}else{
+		}).catch(err => {
 			let response = {
 				success : false,
-				error: "No matching email"
-			}
+				error : "Error: error getting users doc"
+			};
 			res.json(response);
-		}
-	})
+		});
+	}
 });
 
 /***************************
@@ -272,7 +282,7 @@ router.post('/get_all_users', function(req,res){
 		}).catch(err => {
 			let response = {
 				users : result,
-				error : "Error getting users",
+				error : "Error: error getting users document",
 				success : false
 			}
 			res.json(response);
