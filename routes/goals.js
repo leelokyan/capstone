@@ -48,6 +48,7 @@ router.post('/get_goals', function(req,res){
 				let stratRef = db.collection("strategies").doc(strategyId).get()
 					.then(doc => {
 						response = {
+							strategyId : strategyId,
 							strategy : doc.data().name,
 							success : true,
 							error : "",
@@ -57,6 +58,7 @@ router.post('/get_goals', function(req,res){
 					})
 					.catch ( err => {
 						response = {
+							strategyId : strategyId,
 							strategy : strategy,
 							success : false,
 							error : err,
