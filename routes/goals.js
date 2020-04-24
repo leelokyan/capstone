@@ -87,12 +87,22 @@ router.post('/get_goals', function(req,res){
 ***************************/
 router.post('/create_goal', function(req,res){
 	let strategy = req.body.strategyId;
+	let name = req.body.name;
+	let description = req.body.description;
+
+	if(!strategy || !name || !description){
+		let response = {
+			success : false,
+			error : "Error: strategyId, name, or description is null"
+		};
+		res.json(response);
+	}
 	
 	//Create Goal
 	let data = {
-		name : req.body.name,
+		name : name,
 		strategyId : strategy,
-		description : req.body.description,
+		description : description,
 		objectives : [],
 		startDate : req.body.startDate,
 		endDate : req.body.endDate,
@@ -141,6 +151,14 @@ router.post('/create_goal', function(req,res){
 ***************************/
 router.post('/delete_goal', function(req,res){
 	let goalId = req.body.goalId;
+
+	if(!goalId){
+		let response = {
+			success : false,
+			error : "Error: goalId is null"
+		};
+		res.json(response);
+	}
 	
 	let goalRef = db.collection('goals').doc(goalId);
 	goalRef.get().then(doc => {
@@ -150,12 +168,7 @@ router.post('/delete_goal', function(req,res){
 				console.log(doc.data().objectives[x]);
 				db.collection('objectives').doc(doc.data().objectives[x]).update({valid:false});
 			}
-			//Remove Goal from Strategy
-			// let strategy = doc.data().strategy;
-			// console.log(strategy);
-			// db.collection('strategies').doc(strategy).update({
-				// goals : admin.firestore.FieldValue.arrayRemove(goalId)
-			// });
+
 			//Delete Goal
 			goalRef.update({valid:false});
 
