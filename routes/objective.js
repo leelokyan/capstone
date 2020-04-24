@@ -74,7 +74,8 @@ router.post('/get_my_objectives', function(req,res){
 /***************************
 	Get Objectives of Goal:
 		Request - (string:goalId)
-		Response - (bool:success,string:error,array of objectives objects:objectives)
+		Response - (string:goalId, string:strategyId, string: goal (goalname),
+		string: strategy (strategy name), bool:success,string:error,array of objectives objects:objectives)
 ***************************/
 router.post('/get_objectives', function(req,res){
 	let goalId = req.body.goalId;
@@ -128,6 +129,8 @@ router.post('/get_objectives', function(req,res){
 							strategy = stratDat.name;
 
 							var response = {
+								goalId : goalId,
+								strategyId : stratDat.id,
 								goal : goal,
 								strategy : strategy,
 								objectives : result,
