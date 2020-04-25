@@ -48,4 +48,4 @@ app.use(users);
 // app.get('/', (req, res) => res.send("Welcome to Capstone"));
 app.get('/', (req, res) => res.sendFile(__dirname +"/sample.html"));
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => console.log(`Listening on port ${port}!`));
