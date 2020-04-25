@@ -137,6 +137,7 @@ router.post('/get_objectives', function(req,res){
 								error : "",
 								success : true
 							};
+							console.log(strategyId);
 							res.json(response);
 
 						})
