@@ -365,6 +365,12 @@ router.post('/update_objective', function(req,res){
 					status : status
 				});
 
+				// Add tags to tag collection
+				let tagRef = db.collection("tags");
+				for(let t in tags){
+					tagRef.doc(tags[t]).set({tagName:tags[t]});
+				}
+
 				var response = {
 					success : true,
 					error : error
@@ -419,173 +425,6 @@ router.post('/update_objective_status', function(req,res){
 			console.log('error getting doc' , err);
 		});
 
-});
-
-/***************************
-	Add Tag:
-		Request - (string:tagName)
-		Response - (bool:success)
-***************************/
-router.post('/add_tag', function(req,res){
-	let tag = req.body.tagName;
-	if(!tag){
-		var response = {
-			success : false,
-			error : "tag is null"
-		}
-		res.json(response);
-	}else{
-		tagRef = db.collection('tags');
-
-		let newTag = {
-			tagName : tag
-		}
-		tagRef.doc(tag).set(newTag);
-		var response = {
-			success : true,
-			error : ""
-		}
-		res.json(response);
-	}
-});
-
-
-/***************************
-	Assign Tag:
-		Request - (string:tagName, string objectiveId)
-		Response - (bool:success)
-***************************/
-router.post('/assign_tag', function(req,res){
-	let tag = req.body.tagName;
-	let objective = req.body.objectiveId;
-
-	let objRef = db.collection('objectives').doc(objective);
-	objRef.get().then(doc =>{
-		if(doc.exists){
-			objRef.update({
-				tags : admin.firestore.FieldValue.arrayUnion(tag)
-			});
-			let response = {
-				success : true,
-				error : ""
-			}
-			res.send(response);
-		}else{
-			let response = {
-				success : false,
-				error : "Objective Id does not match any objective"
-			}
-			res.send(response);
-		}
-	});
-});
-
-/***************************
-	Unassign Tag:
-		Request - (string:tagName, string objectiveId)
-		Response - (bool:success)
-***************************/
-router.post('/unassign_tag', function(req,res){
-	let tag = req.body.tagName;
-	let objective = req.body.objectiveId;
-
-	let objRef = db.collection('objectives').doc(objective);
-	objRef.get().then(doc =>{
-		if(doc.exists){
-			objRef.update({
-				tags : admin.firestore.FieldValue.arrayRemove(tag)
-			});
-			let response = {
-				success : true,
-				error : ""
-			}
-			res.send(response);
-		}else{
-			let response = {
-				success : false,
-				error : "Objective Id does not match any objective"
-			}
-			res.send(response);
-		}
-	});
-});
-
-/***************************
-	Assign User:
-		Request - (string:userId, string: objectiveId)
-		Response - (bool:success, string:error)
-***************************/
-router.post('/assign_user', function(req,res) {
-	let userId = req.body.userId;
-	let objectiveId = req.body.objectiveId;
-	let response = null;
-	if(!userId || !objectiveId){
-		response = {
-			success : false,
-			error : "Either userId or objectiveId is null"
-		}
-		res.json(response);
-	}
-	else{
-		let objRef = db.collection('objectives').doc(objectiveId);
-		objRef.get().then(doc => {
-			if(doc.exists){
-				objRef.update({
-					assignedUsers : admin.firestore.FieldValue.arrayUnion(userId)
-				})
-				response = {
-					success : true,
-					error : ""
-				};
-				res.json(response);
-			}else{
-				response = {
-					success : false,
-					error : "objectiveId does not exist"
-				}
-				res.json(response);
-			}
-		});
-	}
-});
-
-/***************************
-	Unassign User:
-		Request - (string:userId, string: objectiveId)
-		Response - (bool:success, string:error)
-***************************/
-router.post('/unassign_user', function(req,res) {
-	let userId = req.body.userId;
-	let objectiveId = req.body.objectiveId;
-	let response = null;
-	if(!objectiveId || !objectiveId){
-		response = {
-			success : false,
-			error : "Either userId or objectiveId is null"
-		}
-		res.json(response);
-	}
-	else{
-		let objRef = db.collection('objectives').doc(objectiveId);
-		objRef.get().then(doc => {
-			if(doc.exists){
-				objRef.update({
-					assignedUsers : admin.firestore.FieldValue.arrayRemove(userId)
-				})
-				response = {
-					success : true,
-					error : ""
-				};
-				res.json(response);
-			}else{
-				response = {
-					success : false,
-					error : "objectiveId does not exist"
-				}
-				res.json(response);
-			}
-		});
-	}
 });
 
 /***************************

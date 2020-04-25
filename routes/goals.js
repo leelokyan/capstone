@@ -245,6 +245,11 @@ router.post('/update_goal', function(req,res){
 								strategyRef.doc(oldStrategyId).update({
 									goals: admin.firestore.FieldValue.arrayRemove(goalId)
 								});
+								let response = {
+									success : true,
+									error : ""
+								}
+								res.json(response);
 							}else{
 								let response = {
 									success : false,
@@ -254,11 +259,6 @@ router.post('/update_goal', function(req,res){
 							}
 						});
 				}
-				let response = {
-					success : true,
-					error : ""
-				}
-				res.json(response);
 			}else{
 				response = {
 					success : false,
