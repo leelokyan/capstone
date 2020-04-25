@@ -130,14 +130,13 @@ router.post('/get_objectives', function(req,res){
 
 							var response = {
 								goalId : goalId,
-								strategyId : stratDat.id,
+								strategyId : data.strategyId,
 								goal : goal,
 								strategy : strategy,
 								objectives : result,
 								error : "",
 								success : true
 							};
-							console.log(strategyId);
 							res.json(response);
 
 						})
