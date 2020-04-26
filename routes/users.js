@@ -13,31 +13,68 @@ function initialize () {
 
 /***************************
 	Update Password:
-		Request - (String: password)
+		Request - (String: oldPassword, String: newPassword, String: confirmPassword)
 		Response - (Boolean: success, String : error)
 ***************************/
 router.post('/update_password',function(req,res){
-	let password = req.body.password;
-	if(!password){
-		let response= {
+	let oldPassword = req.body.oldPassword;
+	let newPassword = req.body.newPassword;
+	let confirmPassword = req.body.confirmPassword;
+
+	if(!oldPassword || !newPassword || !confirmPassword){
+		let response = {
 			success : false,
-			error : "Error: no password sent"
+			error : "Error: missing parameter"
+		};
+		res.json(response);
+	}else if(newPassword != confirmPassword){
+		let response = {
+			success : false,
+			error : "Error: Passwords do not match"
 		};
 		res.json(response);
 	}else{
-		bcrypt.genSalt(saltRounds, function(err, salt) {
-		    bcrypt.hash(password, salt, function(err, hash) {
-		        let data = {
-					authCode : hash
-				};
-				let setDoc = db.collection('workspaces').doc('access').set(data);
+		let workspaceRef = db.collection('workspaces').doc('access');
+		workspaceRef.get().then(doc =>{
+			if(doc.exists){
+				let hash = doc.data().authCode;
+				bcrypt.compare(oldPassword, hash, function(err, result){
+					if(result){
+						bcrypt.genSalt(saltRounds, function(err, salt){
+							bcrypt.hash(newPassword, salt, function(err, hash){
+								let data = {
+									authCode : hash
+								};
+								let setDoc = db.collection('workspaces').doc('access').set(data);
+								let response = {
+									sucess : true,
+									error : ""
+								};
+								res.json(response);
+							});
+						});
+					}else{
+						let response = {
+							sucess : false,
+							error : "Error: old password does not match current password"
+						};
+						res.json(response);
+					}
+				});
+			}else{
 				let response = {
-					success : true,
-					error : ""
+					sucess : false,
+					error: "Error: unable to retrieve password hash"
 				};
 				res.json(response);
-		    });
-		});	
+			}
+		}).catch(err =>{
+			let response = {
+				sucess : false,
+				error : "Error: Error getting workspace doc"
+			};
+			res.json(response);
+		});
 	}
 });
 /***************************
