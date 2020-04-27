@@ -1,6 +1,0 @@
-TO DO
-- supposrt completion for strategies  - for completion we need 3 statuses : not started, in progress, completed
-- assignedUSers should be 1 per objective
-- add delete for goals, users, strategy 
-- possibly sessions
-- we need to finish objectives 
